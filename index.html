@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Lịch trình hằng ngày</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #526078;
+      --primary: #2457d6;
+      --primary-hover: #1946b8;
+      --border: #cbd5e1;
+      --focus: #0b63ce;
+      --company: #1d4ed8;
+      --company-bg: #eff6ff;
+      --personal: #6d28d9;
+      --personal-bg: #f5f3ff;
+      --success: #146c45;
+      --success-bg: #edf9f2;
+      --warning: #714500;
+      --warning-bg: #fff7d6;
+      --warning-border: #c98500;
+      --danger: #b42318;
+      --danger-bg: #fff1f0;
+      --shadow: 0 10px 30px rgba(23, 32, 51, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      background: var(--page);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+
+    button, input, select { min-height: 44px; }
+
+    button { cursor: pointer; }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 20;
+      top: 8px;
+      left: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--text);
+      color: #fff;
+      transform: translateY(-150%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .site-header {
+      background: linear-gradient(135deg, #173ea8, #2457d6 58%, #4777e9);
+      color: #fff;
+    }
+
+    .header-inner, main, .footer-inner {
+      width: min(100% - 32px, 1120px);
+      margin-inline: auto;
+    }
+
+    .header-inner { padding: 34px 0 30px; }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 6px;
+      font-size: clamp(1.75rem, 5vw, 2.3rem);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }
+
+    .header-inner p { margin-bottom: 0; color: #eaf0ff; }
+
+    main { padding: 24px 0 36px; }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .date-panel {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+      padding: 20px;
+    }
+
+    .date-panel h2 { margin-bottom: 4px; font-size: 1.15rem; }
+    .date-panel p { margin-bottom: 0; color: var(--muted); }
+    .date-control { width: min(100%, 260px); flex: 0 0 auto; }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: minmax(310px, 370px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .form-panel { padding: 22px; }
+
+    .form-panel h2, .timeline-panel h2 {
+      margin-bottom: 6px;
+      font-size: 1.4rem;
+      line-height: 1.25;
+    }
+
+    .section-intro { margin-bottom: 20px; color: var(--muted); }
+    .edit-context { margin: -8px 0 18px; color: var(--primary-hover); font-weight: 650; overflow-wrap: anywhere; }
+
+    .field { margin-bottom: 16px; min-width: 0; }
+    .field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+    label { display: inline-block; margin-bottom: 6px; font-weight: 700; }
+
+    input, select {
+      width: 100%;
+      border: 1px solid #9eabbc;
+      border-radius: 9px;
+      background: #fff;
+      color: var(--text);
+      padding: 9px 11px;
+    }
+
+    input:hover, select:hover { border-color: #6d7d92; }
+    input[aria-invalid="true"], select[aria-invalid="true"] { border: 2px solid var(--danger); }
+
+    .hint { display: block; margin-top: 5px; color: var(--muted); font-size: 0.875rem; }
+    .field-error { display: block; min-height: 0; margin-top: 5px; color: var(--danger); font-size: 0.875rem; font-weight: 650; }
+    .field-error:empty { display: none; }
+
+    .notice {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border: 1px solid;
+      border-radius: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .notice strong { display: block; margin-bottom: 2px; }
+    .notice.warning { border-color: var(--warning-border); background: var(--warning-bg); color: var(--warning); }
+    .notice.error { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+    .notice[hidden] { display: none; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      padding: 9px 15px;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { border-color: #8b99aa; background: #fff; color: var(--text); }
+    .btn-secondary:hover { background: #eef2f7; }
+    .btn-danger { border-color: #d8a09b; background: #fff; color: #9b1c13; }
+    .btn-danger:hover { background: var(--danger-bg); }
+    .actions .btn-primary { flex: 1 1 180px; }
+
+    .timeline-panel { min-width: 0; padding: 22px; }
+    .timeline-header { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 18px; }
+    .timeline-header p { margin: 0; color: var(--muted); }
+    .count { flex: 0 0 auto; border-radius: 999px; background: #e8eefc; color: #173ea8; padding: 5px 10px; font-size: 0.875rem; font-weight: 750; }
+
+    .task-list { position: relative; margin: 0; padding: 0; list-style: none; }
+    .task-list::before { content: ""; position: absolute; top: 8px; bottom: 8px; left: 57px; width: 2px; background: #d9e1ec; }
+
+    .task-item { position: relative; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 22px; margin-bottom: 16px; }
+    .task-item:last-child { margin-bottom: 0; }
+    .time-start { padding-top: 15px; color: var(--muted); font-size: 0.82rem; font-weight: 800; text-align: right; }
+    .task-dot { position: absolute; top: 20px; left: 53px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+
+    .task-card {
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+      border-radius: 12px;
+      background: #fff;
+      padding: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .task-card.company { border-left-color: var(--company); }
+    .task-card.personal { border-left-color: var(--personal); }
+    .task-card.completed { background: var(--success-bg); }
+    .task-card.completed h3 { text-decoration: line-through; text-decoration-thickness: 2px; }
+
+    .task-time { margin-bottom: 4px; color: var(--muted); font-size: 0.9rem; font-weight: 700; }
+    .task-card h3 { margin-bottom: 10px; font-size: 1.08rem; line-height: 1.35; }
+    .badges { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+    .badge { display: inline-block; border: 1px solid; border-radius: 999px; padding: 3px 8px; font-size: 0.78rem; font-weight: 750; }
+    .badge-company { border-color: #93b7f5; background: var(--company-bg); color: var(--company); }
+    .badge-personal { border-color: #c8b5f7; background: var(--personal-bg); color: var(--personal); }
+    .badge-priority { border-color: #aeb8c6; background: #f7f9fc; color: #3d4b60; }
+    .badge-overlap { border-color: var(--warning-border); background: var(--warning-bg); color: var(--warning); }
+
+    .completion-control { display: flex; align-items: center; gap: 9px; min-height: 44px; margin: 0 0 12px; }
+    .completion-control input { flex: 0 0 auto; width: 20px; min-height: 20px; height: 20px; margin: 0; }
+    .completion-control label {
+      display: inline-flex;
+      align-items: center;
+      min-width: 44px;
+      min-height: 44px;
+      margin: 0;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .task-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .task-actions .btn { min-height: 44px; padding: 7px 13px; }
+
+    .empty-state { border: 1px dashed #9eabbc; border-radius: 12px; background: #f8fafc; padding: 30px 20px; text-align: center; }
+    .empty-state h3 { margin-bottom: 6px; }
+    .empty-state p { margin-bottom: 18px; color: var(--muted); }
+
+    footer { border-top: 1px solid #dce3ed; color: var(--muted); }
+    .footer-inner { padding: 20px 0 26px; font-size: 0.9rem; }
+    .footer-inner p { margin: 0; }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 767px) {
+      .header-inner, main, .footer-inner { width: min(100% - 32px, 1120px); }
+      .header-inner { padding: 26px 0 24px; }
+      main { padding-top: 18px; }
+      .date-panel { align-items: stretch; flex-direction: column; padding: 18px; }
+      .date-control { width: 100%; }
+      .app-grid { grid-template-columns: 1fr; gap: 20px; }
+      .form-panel, .timeline-panel { padding: 18px; }
+      .timeline-header { align-items: flex-start; flex-direction: column; gap: 8px; }
+    }
+
+    @media (max-width: 390px) {
+      .field-row { grid-template-columns: 1fr; gap: 0; }
+      .actions { flex-direction: column; }
+      .actions .btn { width: 100%; flex-basis: auto; }
+      .task-list::before { left: 5px; }
+      .task-item { display: block; padding-left: 18px; }
+      .time-start { display: none; }
+      .task-dot { top: 20px; left: 1px; }
+      .task-actions .btn { flex: 1 1 92px; }
+    }
+
+    @media (min-width: 768px) and (min-height: 720px) {
+      .form-panel { position: sticky; top: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#schedule">Bỏ qua đến lịch trình</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <h1>Lịch trình hằng ngày</h1>
+      <p>Sắp xếp công việc và thời gian cá nhân trong ngày.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel date-panel" aria-labelledby="date-heading">
+      <div>
+        <h2 id="date-heading">Chọn ngày</h2>
+        <p>Mỗi ngày có một lịch riêng được lưu trên thiết bị này.</p>
+      </div>
+      <div class="date-control">
+        <label for="schedule-date">Ngày xem lịch</label>
+        <input id="schedule-date" type="date" required>
+        <span class="field-error" id="date-error"></span>
+      </div>
+    </section>
+
+    <div id="storage-notice" class="notice error" role="alert" hidden></div>
+
+    <div class="app-grid">
+      <section class="panel form-panel" aria-labelledby="form-heading">
+        <h2 id="form-heading">Thêm công việc</h2>
+        <p class="section-intro" id="form-intro">Điền thời gian và thông tin để tạo lịch.</p>
+        <p class="edit-context" id="edit-context" hidden></p>
+
+        <form id="task-form" novalidate>
+          <div class="field">
+            <label for="task-title">Tiêu đề công việc</label>
+            <input id="task-title" name="title" type="text" required maxlength="120" placeholder="Ví dụ: Họp nhóm dự án" aria-describedby="title-hint title-error">
+            <span class="hint" id="title-hint">Tối đa 120 ký tự.</span>
+            <span class="field-error" id="title-error"></span>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="start-time">Giờ bắt đầu</label>
+              <input id="start-time" name="start" type="time" required aria-describedby="start-error">
+              <span class="field-error" id="start-error"></span>
+            </div>
+            <div class="field">
+              <label for="end-time">Giờ kết thúc</label>
+              <input id="end-time" name="end" type="time" required aria-describedby="end-error">
+              <span class="field-error" id="end-error"></span>
+            </div>
+          </div>
+
+          <div id="overlap-notice" class="notice warning" role="status" aria-live="polite" hidden></div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="task-category">Danh mục</label>
+              <select id="task-category" name="category" required aria-describedby="category-error">
+                <option value="company">Công ty</option>
+                <option value="personal">Cá nhân</option>
+              </select>
+              <span class="field-error" id="category-error"></span>
+            </div>
+            <div class="field">
+              <label for="task-priority">Mức ưu tiên</label>
+              <select id="task-priority" name="priority" required aria-describedby="priority-error">
+                <option value="low">Thấp</option>
+                <option value="medium" selected>Vừa</option>
+                <option value="high">Cao</option>
+              </select>
+              <span class="field-error" id="priority-error"></span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="submit-button" type="submit">Thêm vào lịch</button>
+            <button class="btn btn-secondary" id="cancel-edit" type="button" hidden>Hủy chỉnh sửa</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel timeline-panel" id="schedule" aria-labelledby="timeline-heading">
+        <div class="timeline-header">
+          <div>
+            <h2 id="timeline-heading" tabindex="-1">Lịch trình</h2>
+            <p id="selected-date-label"></p>
+          </div>
+          <span class="count" id="task-count">0 công việc</span>
+        </div>
+        <div id="date-read-error" class="notice error" role="alert" hidden></div>
+        <ol class="task-list" id="task-list"></ol>
+        <div class="empty-state" id="empty-state" hidden>
+          <h3>Chưa có công việc nào</h3>
+          <p>Hãy thêm công việc đầu tiên cho ngày này.</p>
+          <button class="btn btn-primary" id="empty-add-button" type="button">Thêm công việc</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="visually-hidden" id="app-status" role="status" aria-live="polite" aria-atomic="true"></div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p>Dữ liệu chỉ được lưu trong trình duyệt này. Ứng dụng không đồng bộ với dịch vụ bên ngoài.</p>
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    const STORAGE_PREFIX = "lich-trinh-hang-ngay:v1:";
+    const VALID_CATEGORIES = ["company", "personal"];
+    const VALID_PRIORITIES = ["low", "medium", "high"];
+    const categoryLabels = { company: "Công ty", personal: "Cá nhân" };
+    const priorityLabels = { low: "Thấp", medium: "Vừa", high: "Cao" };
+    const memoryStore = new Map();
+    const corruptDates = new Set();
+
+    const elements = {
+      date: document.getElementById("schedule-date"),
+      dateError: document.getElementById("date-error"),
+      storageNotice: document.getElementById("storage-notice"),
+      form: document.getElementById("task-form"),
+      formHeading: document.getElementById("form-heading"),
+      formIntro: document.getElementById("form-intro"),
+      editContext: document.getElementById("edit-context"),
+      title: document.getElementById("task-title"),
+      start: document.getElementById("start-time"),
+      end: document.getElementById("end-time"),
+      category: document.getElementById("task-category"),
+      priority: document.getElementById("task-priority"),
+      overlapNotice: document.getElementById("overlap-notice"),
+      submit: document.getElementById("submit-button"),
+      cancel: document.getElementById("cancel-edit"),
+      selectedDateLabel: document.getElementById("selected-date-label"),
+      timelineHeading: document.getElementById("timeline-heading"),
+      count: document.getElementById("task-count"),
+      list: document.getElementById("task-list"),
+      empty: document.getElementById("empty-state"),
+      emptyAdd: document.getElementById("empty-add-button"),
+      readError: document.getElementById("date-read-error"),
+      status: document.getElementById("app-status")
+    };
+
+    const errors = {
+      title: document.getElementById("title-error"),
+      start: document.getElementById("start-error"),
+      end: document.getElementById("end-error"),
+      category: document.getElementById("category-error"),
+      priority: document.getElementById("priority-error")
+    };
+
+    let tasks = [];
+    let editingId = null;
+    let editReturnButton = null;
+    let storageAvailable = testStorage();
+
+    function testStorage() {
+      try {
+        const key = STORAGE_PREFIX + "test";
+        window.localStorage.setItem(key, "ok");
+        window.localStorage.removeItem(key);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function showStorageWarning() {
+      if (storageAvailable) {
+        elements.storageNotice.hidden = true;
+        elements.storageNotice.textContent = "";
+        return;
+      }
+      elements.storageNotice.textContent = "Không thể lưu dữ liệu trong trình duyệt. Thay đổi có thể mất khi đóng trang.";
+      elements.storageNotice.hidden = false;
+    }
+
+    function localDateValue() {
+      const now = new Date();
+      const year = String(now.getFullYear());
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
+    function isValidDateValue(value) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const parts = value.split("-").map(Number);
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      return date.getFullYear() === parts[0] && date.getMonth() === parts[1] - 1 && date.getDate() === parts[2];
+    }
+
+    function formatDate(value) {
+      if (!isValidDateValue(value)) return "ngày chưa hợp lệ";
+      const parts = value.split("-").map(Number);
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      const formatted = new Intl.DateTimeFormat("vi-VN", {
+        weekday: "long", day: "2-digit", month: "2-digit", year: "numeric"
+      }).format(date);
+      return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+
+    function isValidTime(value) {
+      return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+    }
+
+    function timeToMinutes(value) {
+      const parts = value.split(":").map(Number);
+      return parts[0] * 60 + parts[1];
+    }
+
+    function makeId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+      return "task-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+    }
+
+    function normalizeTask(raw, index) {
+      if (!raw || typeof raw !== "object") return null;
+      if (typeof raw.id !== "string" || typeof raw.title !== "string") return null;
+      if (!isValidTime(raw.start) || !isValidTime(raw.end) || timeToMinutes(raw.end) <= timeToMinutes(raw.start)) return null;
+      if (!VALID_CATEGORIES.includes(raw.category) || !VALID_PRIORITIES.includes(raw.priority)) return null;
+      const title = raw.title.trim().slice(0, 120);
+      if (!title) return null;
+      return {
+        id: raw.id,
+        title: title,
+        start: raw.start,
+        end: raw.end,
+        category: raw.category,
+        priority: raw.priority,
+        completed: raw.completed === true,
+        createdAt: Number.isFinite(raw.createdAt) ? raw.createdAt : index
+      };
+    }
+
+    function loadTasks(dateValue) {
+      if (!isValidDateValue(dateValue)) return [];
+      if (!storageAvailable) return memoryStore.get(dateValue) || [];
+      try {
+        const raw = window.localStorage.getItem(STORAGE_PREFIX + dateValue);
+        if (raw === null) {
+          corruptDates.delete(dateValue);
+          return [];
+        }
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error("Dữ liệu không phải danh sách");
+        const normalized = parsed.map(normalizeTask).filter(Boolean);
+        corruptDates.delete(dateValue);
+        return normalized;
+      } catch (error) {
+        corruptDates.add(dateValue);
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      const dateValue = elements.date.value;
+      memoryStore.set(dateValue, tasks.slice());
+      if (!storageAvailable) {
+        showStorageWarning();
+        return false;
+      }
+      try {
+        window.localStorage.setItem(STORAGE_PREFIX + dateValue, JSON.stringify(tasks));
+        corruptDates.delete(dateValue);
+        return true;
+      } catch (error) {
+        storageAvailable = false;
+        showStorageWarning();
+        return false;
+      }
+    }
+
+    function announce(message) {
+      elements.status.textContent = "";
+      window.setTimeout(function () { elements.status.textContent = message; }, 20);
+    }
+
+    function clearChildren(node) {
+      while (node.firstChild) node.removeChild(node.firstChild);
+    }
+
+    function appendTextElement(parent, tagName, text, className) {
+      const node = document.createElement(tagName);
+      if (className) node.className = className;
+      node.textContent = text;
+      parent.appendChild(node);
+      return node;
+    }
+
+    function sortedTasks() {
+      return tasks.slice().sort(function (a, b) {
+        return a.start.localeCompare(b.start) || a.end.localeCompare(b.end) || a.createdAt - b.createdAt;
+      });
+    }
+
+    function overlaps(a, b) {
+      return timeToMinutes(a.start) < timeToMinutes(b.end) && timeToMinutes(b.start) < timeToMinutes(a.end);
+    }
+
+    function overlapMatches(candidate, excludedId) {
+      if (!isValidTime(candidate.start) || !isValidTime(candidate.end)) return [];
+      if (timeToMinutes(candidate.end) <= timeToMinutes(candidate.start)) return [];
+      return tasks.filter(function (task) {
+        return task.id !== excludedId && overlaps(candidate, task);
+      });
+    }
+
+    function overlapCountFor(task) {
+      return tasks.filter(function (other) { return other.id !== task.id && overlaps(task, other); }).length;
+    }
+
+    function updateReadError() {
+      const dateValue = elements.date.value;
+      if (corruptDates.has(dateValue)) {
+        elements.readError.textContent = "Không thể đọc dữ liệu đã lưu cho ngày này. Bạn có thể bắt đầu lại bằng cách thêm công việc mới; lần lưu tiếp theo sẽ thay thế dữ liệu hỏng của ngày này.";
+        elements.readError.hidden = false;
+      } else {
+        elements.readError.textContent = "";
+        elements.readError.hidden = true;
+      }
+    }
+
+    function createBadge(text, className) {
+      const badge = document.createElement("span");
+      badge.className = "badge " + className;
+      badge.textContent = text;
+      return badge;
+    }
+
+    function renderTask(task) {
+      const item = document.createElement("li");
+      item.className = "task-item";
+      item.dataset.taskId = task.id;
+
+      appendTextElement(item, "span", task.start, "time-start");
+      const dot = document.createElement("span");
+      dot.className = "task-dot";
+      dot.setAttribute("aria-hidden", "true");
+      item.appendChild(dot);
+
+      const card = document.createElement("article");
+      card.className = "task-card " + task.category + (task.completed ? " completed" : "");
+
+      appendTextElement(card, "p", task.start + "–" + task.end, "task-time");
+      appendTextElement(card, "h3", task.title);
+
+      const badges = document.createElement("div");
+      badges.className = "badges";
+      badges.appendChild(createBadge(categoryLabels[task.category], "badge-" + task.category));
+      badges.appendChild(createBadge("Ưu tiên: " + priorityLabels[task.priority], "badge-priority"));
+      const conflictCount = overlapCountFor(task);
+      if (conflictCount > 0) {
+        const conflictText = "Trùng giờ · " + conflictCount + " công việc khác";
+        badges.appendChild(createBadge(conflictText, "badge-overlap"));
+      }
+      card.appendChild(badges);
+
+      const completion = document.createElement("div");
+      completion.className = "completion-control";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "complete-" + task.id;
+      checkbox.checked = task.completed;
+      const completionLabel = document.createElement("label");
+      completionLabel.htmlFor = checkbox.id;
+      completionLabel.textContent = task.completed
+        ? "Đã hoàn thành — bỏ đánh dấu “" + task.title + "”"
+        : "Chưa hoàn thành — đánh dấu “" + task.title + "”";
+      checkbox.addEventListener("change", function () {
+        task.completed = checkbox.checked;
+        saveTasks();
+        render();
+        announce("Đã cập nhật trạng thái.");
+        const replacement = document.getElementById(checkbox.id);
+        if (replacement) replacement.focus();
+      });
+      completion.appendChild(checkbox);
+      completion.appendChild(completionLabel);
+      card.appendChild(completion);
+
+      const controls = document.createElement("div");
+      controls.className = "task-actions";
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "btn btn-secondary";
+      editButton.textContent = "Sửa";
+      editButton.setAttribute("aria-label", "Sửa công việc “" + task.title + "”");
+      editButton.addEventListener("click", function () { beginEdit(task.id, editButton); });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "btn btn-danger";
+      deleteButton.textContent = "Xóa";
+      deleteButton.setAttribute("aria-label", "Xóa công việc “" + task.title + "”");
+      deleteButton.addEventListener("click", function () { deleteTask(task.id, item); });
+      controls.appendChild(editButton);
+      controls.appendChild(deleteButton);
+      card.appendChild(controls);
+      item.appendChild(card);
+      return item;
+    }
+
+    function render() {
+      const ordered = sortedTasks();
+      clearChildren(elements.list);
+      ordered.forEach(function (task) { elements.list.appendChild(renderTask(task)); });
+      elements.empty.hidden = ordered.length !== 0;
+      elements.list.hidden = ordered.length === 0;
+      elements.count.textContent = ordered.length + " công việc";
+      const dateText = formatDate(elements.date.value);
+      elements.selectedDateLabel.textContent = dateText;
+      elements.timelineHeading.textContent = "Lịch trình — " + dateText;
+      updateReadError();
+      updateOverlapNotice();
+    }
+
+    function clearFieldError(name, field) {
+      errors[name].textContent = "";
+      field.removeAttribute("aria-invalid");
+    }
+
+    function setFieldError(name, field, message) {
+      errors[name].textContent = "⚠ " + message;
+      field.setAttribute("aria-invalid", "true");
+    }
+
+    function clearAllErrors() {
+      clearFieldError("title", elements.title);
+      clearFieldError("start", elements.start);
+      clearFieldError("end", elements.end);
+      clearFieldError("category", elements.category);
+      clearFieldError("priority", elements.priority);
+      elements.dateError.textContent = "";
+      elements.date.removeAttribute("aria-invalid");
+    }
+
+    function validateForm() {
+      clearAllErrors();
+      const firstInvalid = [];
+      const title = elements.title.value.trim();
+      if (!title) {
+        setFieldError("title", elements.title, "Vui lòng nhập tiêu đề công việc.");
+        firstInvalid.push(elements.title);
+      } else if (title.length > 120) {
+        setFieldError("title", elements.title, "Tiêu đề không được vượt quá 120 ký tự.");
+        firstInvalid.push(elements.title);
+      }
+      if (!isValidTime(elements.start.value)) {
+        setFieldError("start", elements.start, "Vui lòng chọn giờ bắt đầu.");
+        firstInvalid.push(elements.start);
+      }
+      if (!isValidTime(elements.end.value)) {
+        setFieldError("end", elements.end, "Vui lòng chọn giờ kết thúc.");
+        firstInvalid.push(elements.end);
+      }
+      if (isValidTime(elements.start.value) && isValidTime(elements.end.value) && timeToMinutes(elements.end.value) <= timeToMinutes(elements.start.value)) {
+        setFieldError("end", elements.end, "Giờ kết thúc phải sau giờ bắt đầu.");
+        firstInvalid.push(elements.end);
+      }
+      if (!VALID_CATEGORIES.includes(elements.category.value)) {
+        setFieldError("category", elements.category, "Vui lòng chọn danh mục.");
+        firstInvalid.push(elements.category);
+      }
+      if (!VALID_PRIORITIES.includes(elements.priority.value)) {
+        setFieldError("priority", elements.priority, "Vui lòng chọn mức ưu tiên.");
+        firstInvalid.push(elements.priority);
+      }
+      if (!isValidDateValue(elements.date.value)) {
+        elements.dateError.textContent = "⚠ Vui lòng chọn một ngày hợp lệ.";
+        elements.date.setAttribute("aria-invalid", "true");
+        firstInvalid.push(elements.date);
+      }
+      if (firstInvalid.length) {
+        firstInvalid[0].focus();
+        return false;
+      }
+      return true;
+    }
+
+    function taskFromForm(existing) {
+      return {
+        id: existing ? existing.id : makeId(),
+        title: elements.title.value.trim(),
+        start: elements.start.value,
+        end: elements.end.value,
+        category: elements.category.value,
+        priority: elements.priority.value,
+        completed: existing ? existing.completed : false,
+        createdAt: existing ? existing.createdAt : Date.now()
+      };
+    }
+
+    function resetForm(options) {
+      const settings = options || {};
+      elements.form.reset();
+      elements.priority.value = "medium";
+      editingId = null;
+      elements.formHeading.textContent = "Thêm công việc";
+      elements.formIntro.textContent = "Điền thời gian và thông tin để tạo lịch.";
+      elements.editContext.textContent = "";
+      elements.editContext.hidden = true;
+      elements.submit.textContent = "Thêm vào lịch";
+      elements.cancel.hidden = true;
+      elements.overlapNotice.hidden = true;
+      clearAllErrors();
+      if (settings.focusTitle) elements.title.focus();
+    }
+
+    function beginEdit(id, button) {
+      const task = tasks.find(function (candidate) { return candidate.id === id; });
+      if (!task) return;
+      editingId = id;
+      editReturnButton = button;
+      elements.title.value = task.title;
+      elements.start.value = task.start;
+      elements.end.value = task.end;
+      elements.category.value = task.category;
+      elements.priority.value = task.priority;
+      elements.formHeading.textContent = "Chỉnh sửa công việc";
+      elements.formIntro.textContent = "Cập nhật thông tin rồi lưu thay đổi.";
+      elements.editContext.textContent = "Bạn đang chỉnh sửa: " + task.title;
+      elements.editContext.hidden = false;
+      elements.submit.textContent = "Lưu thay đổi";
+      elements.cancel.hidden = false;
+      clearAllErrors();
+      updateOverlapNotice();
+      elements.title.focus();
+      announce("Đã mở chế độ chỉnh sửa.");
+    }
+
+    function cancelEdit() {
+      const returnButton = editReturnButton;
+      resetForm();
+      editReturnButton = null;
+      announce("Đã hủy chỉnh sửa.");
+      if (returnButton && document.contains(returnButton)) returnButton.focus();
+      else elements.title.focus();
+    }
+
+    function deleteTask(id, item) {
+      const index = tasks.findIndex(function (task) { return task.id === id; });
+      if (index < 0) return;
+      const task = tasks[index];
+      if (!window.confirm("Xóa “" + task.title + "”? Thao tác này không thể hoàn tác.")) return;
+      const ordered = sortedTasks();
+      const orderedIndex = ordered.findIndex(function (candidate) { return candidate.id === id; });
+      const focusTargetId = ordered[orderedIndex + 1] ? ordered[orderedIndex + 1].id : (ordered[orderedIndex - 1] ? ordered[orderedIndex - 1].id : null);
+      tasks.splice(index, 1);
+      if (editingId === id) resetForm();
+      saveTasks();
+      render();
+      announce("Đã xóa công việc.");
+      if (focusTargetId) {
+        const target = elements.list.querySelector('[data-task-id="' + window.CSS.escape(focusTargetId) + '"] button');
+        if (target) target.focus();
+      } else {
+        elements.timelineHeading.focus();
+      }
+    }
+
+    function updateOverlapNotice() {
+      const candidate = { start: elements.start.value, end: elements.end.value };
+      const matches = overlapMatches(candidate, editingId);
+      clearChildren(elements.overlapNotice);
+      if (!matches.length) {
+        elements.overlapNotice.hidden = true;
+        return;
+      }
+      appendTextElement(elements.overlapNotice, "strong", "Có lịch trùng giờ");
+      const detail = matches.map(function (task) { return "“" + task.title + "” (" + task.start + "–" + task.end + ")"; }).join(", ");
+      appendTextElement(elements.overlapNotice, "span", "Khoảng thời gian này trùng với: " + detail + ". Bạn vẫn có thể lưu.");
+      elements.overlapNotice.hidden = false;
+    }
+
+    function changeDate() {
+      if (!isValidDateValue(elements.date.value)) {
+        elements.dateError.textContent = "⚠ Vui lòng chọn một ngày hợp lệ.";
+        elements.date.setAttribute("aria-invalid", "true");
+        return;
+      }
+      elements.dateError.textContent = "";
+      elements.date.removeAttribute("aria-invalid");
+      resetForm();
+      tasks = loadTasks(elements.date.value);
+      render();
+      announce("Đã mở lịch ngày " + formatDate(elements.date.value) + ".");
+    }
+
+    elements.form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!validateForm()) return;
+      if (editingId) {
+        const index = tasks.findIndex(function (task) { return task.id === editingId; });
+        if (index >= 0) tasks[index] = taskFromForm(tasks[index]);
+        saveTasks();
+        resetForm();
+        editReturnButton = null;
+        render();
+        announce("Đã lưu thay đổi.");
+        elements.title.focus();
+      } else {
+        tasks.push(taskFromForm(null));
+        saveTasks();
+        resetForm();
+        render();
+        announce("Đã thêm công việc.");
+        elements.title.focus();
+      }
+    });
+
+    elements.cancel.addEventListener("click", cancelEdit);
+    elements.date.addEventListener("change", changeDate);
+    elements.emptyAdd.addEventListener("click", function () { elements.title.focus(); });
+    elements.start.addEventListener("change", updateOverlapNotice);
+    elements.end.addEventListener("change", updateOverlapNotice);
+    elements.title.addEventListener("input", function () { if (elements.title.value.trim()) clearFieldError("title", elements.title); });
+    elements.start.addEventListener("input", function () { if (isValidTime(elements.start.value)) clearFieldError("start", elements.start); });
+    elements.end.addEventListener("input", function () { if (isValidTime(elements.end.value)) clearFieldError("end", elements.end); });
+
+    elements.date.value = localDateValue();
+    showStorageWarning();
+    tasks = loadTasks(elements.date.value);
+    render();
+  </script>
+</body>
+</html>
