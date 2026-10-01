@@ -295,3 +295,53 @@ Khu vực xem trước xuất hiện động ngay bên dưới trường ngày �
 
 4. **Hành vi Responsive (320 px đến Desktop):**
    - Ở màn hình hẹp (320 px): `<dialog>` có lề hai bên an toàn 16 px (`width: calc(100% - 32px)`), các nút hành động xếp chồng theo chiều dọc (`flex-direction: column; width: 100%`), không xuất hiện thanh cuộn ngang trang hay hộp thoại.
+
+## 14. Kiến trúc dữ liệu và giải thuật (01/10/2026) — Sao chép lịch sang ngày khác
+
+Đặc tả kiến trúc dữ liệu và giải thuật cho tính năng sao chép lịch được chuẩn hóa chi tiết tại tệp [`COPY_ARCHITECTURE.md`](file:///COPY_ARCHITECTURE.md). Dưới đây là các định nghĩa và ràng buộc cốt lõi dành cho các vai trò triển khai (Frontend) và kiểm thử (QA/Reviewer):
+
+### 14.1. Định danh trùng lặp chính xác 4 trường (4-Field Exact Duplicate Identity)
+- Hai công việc bị coi là trùng lặp khi và chỉ khi khớp chính xác cả 4 trường:
+  `task.title.trim()` + `task.start` + `task.end` + `task.category`.
+- **Ràng buộc:** Trường `priority` và `completed` **không** nằm trong định danh trùng lặp. Khóa định danh tổng hợp: `JSON.stringify([task.title.trim(), task.start, task.end, task.category])`.
+
+### 14.2. Khử trùng tất định nội bộ nguồn & Bảo toàn ngày đích
+- **Khử trùng nội bộ nguồn:** Duyệt danh sách ngày nguồn theo thứ tự thời gian (`sortedTasks()`). Bản ghi đầu tiên của mỗi khóa định danh được chọn làm ứng viên sao chép; các bản ghi trùng lặp phía sau trong ngày nguồn bị bỏ qua và tính vào số lượng **Bỏ qua (skipped)**.
+- **Bảo toàn ngày đích:** Toàn bộ công việc hợp lệ hiện có ở ngày đích được giữ nguyên 100%. Các ứng viên nguồn có khóa trùng với ngày đích sẽ bị bỏ qua.
+- **Bất biến số lượng:** $\text{added} + \text{skipped} = |\text{sourceTasks}|$.
+
+### 14.3. Hợp đồng chuyển đổi bản ghi
+- Các trường giữ nguyên 100%: `title`, `start`, `end`, `category`, `priority`.
+- Các trường sinh mới hoàn toàn:
+  - `id`: Sinh ID duy nhất mới (`makeId()`, UUID v4 hoặc fallback chuỗi ngẫu nhiên). Không dùng lại ID của ngày nguồn.
+  - `createdAt`: Sinh thời điểm tạo mới (`Date.now()`).
+  - `completed`: **Luôn khởi tạo bằng `false`** (tuyệt đối không suy đoán hoàn thành).
+
+### 14.4. Đọc dữ liệu ngày đích: Phân loại 4 trạng thái nghiêm ngặt
+Hàm `readDestinationTasks(destDate)` thanh tra toàn diện và trả về một trong 4 trạng thái:
+1. `missing`: Khóa chưa tồn tại (`raw === null`). Coi là mảng rỗng hợp lệ (`tasks = []`).
+2. `valid`: Chuỗi JSON parse thành mảng và **100% bản ghi** đều thỏa mãn 10 điều kiện kiểm tra nghiêm ngặt của `isValidStoredTask(record)`.
+3. `corrupt_json`: Chuỗi JSON bị lỗi cú pháp ngoại lệ hoặc cấu trúc gốc không phải mảng.
+4. `invalid_records`: Là mảng nhưng có ít nhất 1 bản ghi thiếu trường, sai kiểu hoặc sai logic thời gian.
+
+### 14.5. Nguyên tắc Zero-Write khi có lỗi hoặc không có bản ghi mới
+- Khi ngày đích rơi vào `corrupt_json` hoặc `invalid_records`:
+  - Khóa vùng xem trước và vô hiệu hóa nút Xác nhận (`disabled = true`).
+  - Hiển thị banner cảnh báo lỗi cấu trúc dữ liệu.
+  - **Zero-Write Guarantee:** Tuyệt đối không gọi `localStorage.setItem` hoặc `localStorage.removeItem`.
+- Khi toàn bộ công việc nguồn đều trùng lặp ($\text{added} = 0$):
+  - Hiển thị thông báo giải thích và vô hiệu hóa xác nhận / không ghi. Tuyệt đối không gọi `localStorage.setItem`.
+
+### 14.6. Chống bất đồng bộ dữ liệu (Stale Preview Mitigation)
+- Khi người dùng nhấn nút Xác nhận: Ứng dụng đọc lại dữ liệu ngày đích từ `localStorage` (`readDestinationTasks(destDate)`).
+- Nếu phát hiện chuỗi lưu trữ thô đã thay đổi so với chuỗi lưu lúc xem trước (`freshResult.rawSnapshot !== cachedSnapshot`): Chặn ghi tức thời, hiển thị cảnh báo dữ liệu đã thay đổi, tự động tính toán lại xem trước từ dữ liệu mới và yêu cầu xác nhận lại.
+
+### 14.7. Trùng khoảng giờ nghiêm ngặt (Strict Overlap Math)
+- Điều kiện giao nhau nghiêm ngặt: $A_{\text{start}} < B_{\text{end}} \land B_{\text{start}} < A_{\text{end}}$.
+- **Tiếp xúc biên không phải trùng giờ:** $A_{\text{end}} = B_{\text{start}}$ hoặc $B_{\text{end}} = A_{\text{start}}$ được tính là liền kề hợp lệ, không tính vào số đếm xung đột.
+- Số đếm $Z$: Số lượng công việc trong số các mục mới có khoảng giờ giao nhau với công việc đã có ở ngày đích. Cảnh báo hiển thị dưới dạng thông tin không chặn lưu (non-blocking).
+
+### 14.8. Xác minh số lần ghi LocalStorage không làm lộ dữ liệu
+- QA và bài kiểm tra có thể cài đặt wrapper theo dõi trên `Storage.prototype.setItem` để đếm số lần gọi và kiểm tra tên khóa mà không bao giờ ghi nhận hoặc in nội dung `value` của người dùng.
+- Toàn bộ 12 bất biến toán học và mã giả mẫu được quy định đầy đủ tại [`COPY_ARCHITECTURE.md`](file:///COPY_ARCHITECTURE.md).
+
