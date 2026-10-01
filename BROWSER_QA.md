@@ -123,7 +123,7 @@ Ghi nhận kết quả kiểm thử độc lập cho tính năng **"Quản lý c
 - **Kiểm tra nhánh mã nguồn (Code-path inspection):** Rà soát chi tiết từng nhánh logic trong `index.html` bao gồm bộ chuyển đổi tab WAI-ARIA (`#view-mode-tabs`), điều hướng tuần (`getWeekBoundaries`, `getAdjacentWeek`), tổng hợp động 7 ngày từ các khóa `lich-trinh-hang-ngay:v1:YYYY-MM-DD`, tính toán số liệu tuần (`calculateWeeklyMetrics`), cơ chế cô lập lỗi ngày hỏng (Zero Crash Guarantee), đột biến trạng thái hoàn thành (`toggleTaskCompletionInWeek`) và điều hướng nhanh sang xem ngày (`jumpToDay`).
 - **Rà soát tĩnh & Khả năng tiếp cận (Static review):** Đánh giá cấu trúc ngữ nghĩa HTML, bộ chọn CSS, responsive breakpoint 320 px không tràn ngang, viền focus nhìn thấy rõ ràng `:focus-visible` và kích thước tương tác tối thiểu 44 px.
 - **Smoke checks cố định (`tini.run_checks` / `check_schedule.py`):** Kiểm tra cấu trúc phần tử và cú pháp JavaScript bằng `node --check`. Kết quả: `PASS: schedule smoke checks and JavaScript syntax. Interaction/visual QA still required.`
-- **Điểm móc kiểm thử công khai (Test Hook Interface):** Kiểm chứng thông qua đối tượng thuần túy `window.__weeklyEngine` xuất bản trên window:
+- **Điểm móc kiểm thử công khai (Test Hook Interface):** Đọc mã xác nhận khai báo đối tượng `window.__weeklyEngine` xuất bản trên window:
   - `getWeekBoundaries(dateStr)`
   - `getAdjacentWeek(currentMonday, offsetWeeks)`
   - `toISODateString(d)`
@@ -132,7 +132,18 @@ Ghi nhận kết quả kiểm thử độc lập cho tính năng **"Quản lý c
   - `calculateWeeklyMetrics(daysData)`
   - `toggleTaskCompletionInWeek(taskDate, taskId)`
   - `createWeeklyStorageObserver()`
-- **Tuyên bố giới hạn trung thực (Honest Limitation):** Bộ kiểm thử tự động đa trình duyệt (automated multi-browser execution matrix) **chưa được thực hiện**; kết quả kiểm thử của QA agent dựa trên rà soát nhánh mã nguồn, rà soát tĩnh, smoke check cú pháp và kiểm chứng hàm logic qua test hooks.
+- **Tuyên bố giới hạn trung thực (Honest Limitation):** Bộ kiểm thử tự động đa trình duyệt (automated multi-browser execution matrix) **chưa được thực hiện**; kết quả kiểm thử của QA agent dựa trên rà soát nhánh mã nguồn, rà soát tĩnh, smoke check cú pháp nhưng nhật ký QA chỉ có thao tác đọc tệp; agent chưa gọi test hooks.
+
+### Kiểm chứng bổ sung của người vận hành trên trình duyệt (01/10/2026)
+
+Trên bản app tại `http://127.0.0.1:9002/`, Codex đã thao tác trực tiếp và quan sát:
+
+- Chuyển sang tab tuần hiện tại: trạng thái tuần rỗng hiển thị đúng.
+- Chọn ngày `2099-01-01`: tuần `2098-12-29`–`2099-01-04` tổng hợp 7 việc từ ba ngày có lịch (3 + 2 + 2), gồm 1 đã hoàn thành và 6 còn lại.
+- Bật một checkbox tuần: số liệu đổi thành 2 đã hoàn thành, 5 còn lại và 29%; tắt lại: trở về 1/6 và 14%. Dữ liệu thử được đưa về trạng thái ban đầu.
+- Chọn `2024-02-29`: tuần hiển thị `2024-02-26`–`2024-03-03`; nút tuần sau mở `2024-03-04`–`2024-03-10`.
+
+Đây là kiểm chứng UI bổ sung, không phải 14 ca của QA agent. Chưa đo số lần gọi `localStorage.setItem`, chưa kiểm tra màn hình 320 px hoặc ma trận nhiều trình duyệt.
 
 ## 2. Đối chiếu 14 tình huống kiểm thử với nhánh mã và hành vi (TC-W01 đến TC-W14)
 - **ĐỐI CHIẾU MÃ — TC-W01: Bộ chuyển đổi chế độ xem Ngày / Tuần (View Mode Switcher):**
@@ -207,7 +218,7 @@ Ghi nhận kết quả kiểm thử độc lập cho tính năng **"Quản lý c
 - **ĐỐI CHIẾU MÃ — TC-W12: Điểm móc kiểm thử công khai (Test Hook Interface via window.__weeklyEngine):**
   - Xuất bản đầy đủ đối tượng `window.__weeklyEngine` chứa các hàm logic thuần túy: `getWeekBoundaries`, `getAdjacentWeek`, `toISODateString`, `isValidStoredTask`, `readDateTasks`, `calculateWeeklyMetrics`, `toggleTaskCompletionInWeek`, `createWeeklyStorageObserver`.
   - Cho phép QA và các bài kiểm tra tự động thẩm định trực tiếp mà không cần can thiệp vào UI.
-- **ĐỐI CHIẾU MÃ — TC-W13: Quan sát lượt ghi lưu trữ (Storage Write-Count Observations via createWeeklyStorageObserver):**
+- **ĐỐI CHIẾU MÃ — TC-W13: Số lượt ghi dự kiến (Storage Write-Count Observations via createWeeklyStorageObserver):**
   - Chuyển tab Ngày $\leftrightarrow$ Tuần: 0 lượt gọi `localStorage.setItem`.
   - Chuyển tuần trước / tuần sau / tuần này: 0 lượt gọi `localStorage.setItem`.
   - Nạp tuần có ngày trống / ngày lỗi: 0 lượt gọi `localStorage.setItem`.
@@ -216,9 +227,9 @@ Ghi nhận kết quả kiểm thử độc lập cho tính năng **"Quản lý c
   - *Lịch trình hàng ngày:* Thêm/Sửa/Xóa công việc, xác thực tiêu đề và thời gian (bắt buộc kết thúc sau bắt đầu, từ chối giờ thiếu/đảo ngược/bằng nhau), phân loại Công ty/Cá nhân, mức ưu tiên, công việc mới mặc định `completed: false`, sửa giữ nguyên ID/createdAt/completed, native `window.confirm` cho xóa, checkbox hoàn thành 44×44 px, sắp xếp timeline theo thứ tự thời gian tăng dần, cảnh báo trùng khoảng giờ nghiêm ngặt (tiếp xúc biên không bị trùng, non-blocking save), phân tách dữ liệu độc lập theo khóa `lich-trinh-hang-ngay:v1:YYYY-MM-DD`, cô lập dữ liệu JSON hỏng.
   - *Sao chép lịch sang ngày khác:* Native `<dialog>`, focus trap, phím Escape và nút Hủy hoàn trả focus về trigger, kiểm tra ngày đích khác ngày nguồn, từ chối ngày nguồn rỗng, định danh 4 trường `[title.trim(), start, end, category]` loại trừ priority/completed, khử trùng lặp nội bộ nguồn và trùng lặp ngày đích, cấp ID mới, createdAt mới, reset `completed: false`, cảnh báo trùng khoảng giờ nghiêm ngặt (tiếp xúc biên không tính trùng, non-blocking save), bảo toàn 100% bản ghi cũ ngày đích, cam kết Zero-Write khi toàn bộ trùng lặp hoặc ngày đích hỏng cấu trúc, chống stale preview tại thời điểm xác nhận, giữ nguyên ngày nguồn đang xem, thông báo live region đầy đủ.
 
-## 3. Quan sát Số lượt ghi Lưu trữ (Storage Write-Count Observations)
+## 3. Số lượt ghi dự kiến từ việc đối chiếu mã (chưa đo bằng instrumentation)
 
-| Kịch bản thao tác | Khóa mục tiêu | Số lượt ghi thực tế | Ghi chú an toàn |
+| Kịch bản thao tác | Khóa mục tiêu | Số lượt ghi dự kiến theo mã | Ghi chú an toàn |
 | :--- | :--- | :---: | :--- |
 | **Chuyển chế độ xem Ngày sang Tuần** | Không có | **0** | Chỉ đọc on-the-fly từ 7 khóa ngày |
 | **Bấm "Tuần trước", "Tuần sau", "Tuần này"** | Không có | **0** | Chỉ tính toán biên tuần và đọc dữ liệu |
@@ -239,7 +250,7 @@ Ghi nhận kết quả kiểm thử độc lập cho tính năng **"Quản lý c
 - **Độc lập hoàn toàn:** Không sử dụng thư viện ngoài, không có API mạng hay dịch vụ bên ngoài; không đồng bộ Google Calendar hay Notion.
 
 ## 5. Giới hạn trung thực (Honest Limitations)
-1. **Phạm vi kiểm thử:** Kiểm thử của QA agent được thực hiện thông qua rà soát nhánh mã nguồn chi tiết (code-path inspection), rà soát tĩnh (static review), smoke check cú pháp (`check_schedule.py`), và hook kiểm thử engine (`window.__weeklyEngine`). Ma trận kiểm thử tự động đa trình duyệt (cross-browser automation matrix) chưa được triển khai.
+1. **Phạm vi kiểm thử:** Kiểm thử của QA agent được thực hiện thông qua rà soát nhánh mã nguồn chi tiết (code-path inspection), rà soát tĩnh (static review), smoke check cú pháp (`check_schedule.py`); agent chưa gọi hook kiểm thử engine (`window.__weeklyEngine`). Ma trận kiểm thử tự động đa trình duyệt (cross-browser automation matrix) chưa được triển khai.
 2. **Lịch trong ngày:** Ứng dụng chỉ hỗ trợ công việc bắt đầu và kết thúc trong cùng một ngày (chưa hỗ trợ công việc xuyên qua nửa đêm).
 3. **Lưu trữ cục bộ:** Toàn bộ dữ liệu nằm trên `localStorage` của trình duyệt hiện tại; không có tài khoản, sao lưu đám mây hay đồng bộ Google Calendar/Notion.
 4. **Hộp thoại native:** Xác nhận xóa dựa vào `window.confirm` của từng trình duyệt.

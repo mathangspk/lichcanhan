@@ -182,7 +182,7 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
 - **ĐỐI CHIẾU MÃ — TC-14: Audit DOM an toàn tuyệt đối & Không thư viện/network:**
   - *Kết quả:* 100% phần tử động và văn bản tạo qua `createElement`, `textContent`, `setAttribute`. Không có bất kỳ dòng mã nào sử dụng `innerHTML`, `insertAdjacentHTML` hay `document.write`. Ứng dụng chạy hoàn toàn offline không có dependency, network call hay sync.
 
-### 3. Quan sát Số lượt ghi Lưu trữ (Storage Write-Count Observations)
+### 3. Số lượt ghi dự kiến từ việc đối chiếu mã (chưa đo bằng instrumentation)
 Kiểm chứng thực tế thông qua wrapper `window.__scheduleCopyEngine.createStorageWriteObserver()`:
 - **Từ chối (Nguồn rỗng hoặc ngày đích trùng ngày nguồn):** 0 lượt gọi `localStorage.setItem`.
 - **Bất đồng bộ (Stale preview — ngày đích bị thay đổi trước khi xác nhận):** 0 lượt gọi `localStorage.setItem`.
@@ -301,17 +301,19 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
 - **Kiểm tra nhánh mã nguồn (Code-path inspection):** Rà soát chi tiết toàn bộ logic xử lý trong `index.html` bao gồm các thuật toán đọc/ghi `localStorage`, chuyển đổi tab WAI-ARIA, điều hướng tuần, tổng hợp động 7 ngày, tính toán số liệu tuần, đột biến trạng thái hoàn thành và xử lý sự kiện giao diện.
 - **Rà soát tĩnh & Khả năng tiếp cận (Static review):** Đánh giá cấu trúc HTML ngữ nghĩa, nhãn form tường minh, bộ quy tắc CSS, khả năng co giãn responsive ở breakpoint 320 px và kích thước mục tiêu cảm ứng tối thiểu 44 px.
 - **Smoke checks cố định (`tini.run_checks` / `check_schedule.py`):** Xác thực cấu trúc ứng dụng và tính hợp lệ của cú pháp JavaScript (`node --check`). Kết quả: `PASS: schedule smoke checks and JavaScript syntax. Interaction/visual QA still required.`
-- **Điểm móc kiểm thử công khai (Test Hook Interface):** Kiểm chứng thông qua đối tượng thuần túy `window.__weeklyEngine` chứa đầy đủ các hàm logic: `getWeekBoundaries`, `getAdjacentWeek`, `toISODateString`, `isValidStoredTask`, `readDateTasks`, `calculateWeeklyMetrics`, `toggleTaskCompletionInWeek`, và wrapper theo dõi ghi `createWeeklyStorageObserver`.
-- **Tuyên bố giới hạn trung thực (Honest Limitation):** Bộ kiểm thử tự động đa trình duyệt (automated multi-browser execution matrix) **chưa được thực hiện**; kết quả kiểm thử của QA agent dựa trên rà soát nhánh mã nguồn, rà soát tĩnh, smoke check cú pháp và kiểm chứng hàm logic qua test hooks.
+- **Điểm móc kiểm thử công khai (Test Hook Interface):** Đọc mã xác nhận khai báo đối tượng `window.__weeklyEngine` chứa đầy đủ các hàm logic: `getWeekBoundaries`, `getAdjacentWeek`, `toISODateString`, `isValidStoredTask`, `readDateTasks`, `calculateWeeklyMetrics`, `toggleTaskCompletionInWeek`, và wrapper theo dõi ghi `createWeeklyStorageObserver`.
+- **Tuyên bố giới hạn trung thực (Honest Limitation):** Bộ kiểm thử tự động đa trình duyệt (automated multi-browser execution matrix) **chưa được thực hiện**; kết quả kiểm thử của QA agent dựa trên rà soát nhánh mã nguồn, rà soát tĩnh, smoke check cú pháp nhưng không có bằng chứng agent đã gọi test hooks. Các ca ghi “ĐỐI CHIẾU MÃ” là nhận định từ mã, không phải kết quả chạy trình duyệt.
 
-### 2. Kết quả 14 Ca kiểm thử độc lập chi tiết (TC-W01 đến TC-W14)
-- **PASS — TC-W01: Bộ chuyển đổi chế độ xem Ngày / Tuần (View Mode Switcher):**
+Kiểm chứng UI bổ sung của Codex trên trình duyệt: tab tuần, tổng hợp 7 việc của tuần chứa `2099-01-01`, bật/tắt hoàn thành và biên tuần năm nhuận `2024-02-29` đều hoạt động. Chi tiết và giới hạn bằng chứng xem [BROWSER_QA.md](BROWSER_QA.md).
+
+### 2. Đối chiếu mã cho 14 tình huống kiểm thử (TC-W01 đến TC-W14)
+- **ĐỐI CHIẾU MÃ — TC-W01: Bộ chuyển đổi chế độ xem Ngày / Tuần (View Mode Switcher):**
   - Cấu trúc WAI-ARIA Tabs pattern: `#view-mode-tabs` có `role="tablist"`, các tab `#tab-view-daily` và `#tab-view-weekly` có `role="tab"`, `aria-selected`, `aria-controls`, `tabindex="0"` (khi active) và `tabindex="-1"` (khi inactive).
   - Điều hướng bàn phím đầy đủ: phím `ArrowLeft` / `ArrowRight` / `ArrowUp` / `ArrowDown` chuyển tab; phím `Home` về tab Ngày, `End` sang tab Tuần. Viền focus `:focus-visible` nhìn thấy rõ ràng.
   - Quản lý hiển thị qua thuộc tính `hidden` giữa `#daily-view-panel` và `#weekly-view-panel`.
   - Vùng live region `#app-status` thông báo chính xác khi chuyển chế độ xem: *"Đã chuyển sang chế độ xem theo ngày."* / *"Đã chuyển sang chế độ xem theo tuần..."*.
   - Kích thước tương tác tối thiểu 44×44 CSS px: `.tab-btn` có `min-height: 44px; min-width: 44px; padding: 10px 22px;`.
-- **PASS — TC-W02: Điều hướng tuần & Tính toán biên tuần Thứ Hai – Chủ Nhật (Week Navigation & Date Math across Month/Year Boundaries):**
+- **ĐỐI CHIẾU MÃ — TC-W02: Điều hướng tuần & Tính toán biên tuần Thứ Hai – Chủ Nhật (Week Navigation & Date Math across Month/Year Boundaries):**
   - Quy ước Thứ Hai đến Chủ Nhật chuẩn ISO-8601 qua hàm `getWeekBoundaries(dateStr)`.
   - Phân tích chuỗi số nguyên `[year, month, day]` và khởi tạo 12:00 trưa cục bộ, loại trừ 100% rủi ro trôi ngày do múi giờ hoặc DST.
   - Kiểm thử các trường hợp biên đặc biệt:
@@ -322,12 +324,12 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
     - *Ngày đầu năm giữa tuần:* `2027-01-01` (Thứ Sáu) sinh cùng dải tuần `2026-12-28` đến `2027-01-03`.
     - *Mốc Thứ Hai:* `2026-10-05` bắt đầu đúng ngày đó; mốc Chủ Nhật `2026-10-11` lùi đúng 6 ngày về Thứ Hai.
   - Nút điều hướng `#week-prev-btn`, `#week-today-btn`, `#week-next-btn` đều đạt chiều cao tối thiểu 44 px. Tiêu đề `#week-heading` hiển thị dải tuần tiếng Việt chuẩn và phát thông báo live region.
-- **PASS — TC-W03: Tổng hợp động 7 ngày từ khóa lưu trữ theo ngày (Dynamic 7-Day Aggregation without Weekly Keys):**
+- **ĐỐI CHIẾU MÃ — TC-W03: Tổng hợp động 7 ngày từ khóa lưu trữ theo ngày (Dynamic 7-Day Aggregation without Weekly Keys):**
   - Hàm `readDateTasks(dateStr)` được gọi lần lượt cho 7 ngày `boundaries.days`.
   - Đọc on-the-fly trực tiếp từ các khóa ngày hiện hành `STORAGE_PREFIX + dateStr` (`lich-trinh-hang-ngay:v1:YYYY-MM-DD`).
   - Tuyệt đối không tạo bất kỳ khóa tuần riêng nào (như `week:YYYY-Wxx`), loại trừ triệt để nguy cơ bất đồng bộ bậc hai (secondary desync).
   - Không phát sinh lệnh gọi `localStorage.setItem` trong quá trình đọc và tổng hợp ($\Delta(\text{setItem}) = 0$).
-- **PASS — TC-W04: Độ chính xác số liệu tuần & Bảo toàn khối lượng công việc (Weekly Metrics Accuracy & Metric Conservation):**
+- **ĐỐI CHIẾU MÃ — TC-W04: Độ chính xác số liệu tuần & Bảo toàn khối lượng công việc (Weekly Metrics Accuracy & Metric Conservation):**
   - Hàm `calculateWeeklyMetrics(daysData)` tính toán:
     - `totalWeeklyTasks = sum(|day.tasks|)` cho tất cả các ngày hợp lệ (`valid`).
     - `completedWeeklyTasks = sum(|day.tasks with completed === true|)`.
@@ -335,36 +337,36 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
     - Định luật bảo toàn: `completedWeeklyTasks + remainingWeeklyTasks = totalWeeklyTasks` luôn thỏa mãn 100%.
     - Tỷ lệ phần trăm: `completionRate = total === 0 ? 0 : Math.round((completed / total) * 100)`. Miền giá trị `0 <= completed <= total` và `0 <= rate <= 100`.
     - Ngày bị lỗi cấu trúc dữ liệu (`corrupt_json` hoặc `invalid_records`) được đếm riêng vào `corruptDaysCount`, không tính vào tổng số để tránh sai lệch số liệu.
-- **PASS — TC-W05: Đột biến trạng thái hoàn thành trong giao diện tuần (Completion Toggle Contract):**
+- **ĐỐI CHIẾU MÃ — TC-W05: Đột biến trạng thái hoàn thành trong giao diện tuần (Completion Toggle Contract):**
   - Checkbox `.compact-checkbox` (`#week-chk-${task.id}`) có vùng nhãn liên kết `.compact-completion-label` đạt chuẩn tiếp cận tối thiểu **44×44 CSS px** (`min-width: 44px; min-height: 44px; display: inline-flex;`).
   - Hàm `toggleTaskCompletionInWeek(taskDate, taskId)` tái đọc dữ liệu ngày `taskDate`, đảo trạng thái `completed = !previousState`.
   - Bảo toàn 100% 7 trường dữ liệu còn lại (`id`, `title`, `start`, `end`, `category`, `priority`, `createdAt`) và thứ tự các công việc khác trong ngày.
   - Thực hiện đúng **1 lượt ghi** vào khóa ngày của công việc đó (`STORAGE_PREFIX + taskDate`) và **0 lượt ghi** vào 6 ngày còn lại.
   - Cập nhật tức thì trên giao diện (gạch ngang tiêu đề, đổi nhãn aria-label, cập nhật bảng tổng kết tuần, phát thông báo live region `#app-status`).
-- **PASS — TC-W06: Điều hướng nhanh sang xem ngày (Quick Day Jump):**
+- **ĐỐI CHIẾU MÃ — TC-W06: Điều hướng nhanh sang xem ngày (Quick Day Jump):**
   - Nút `.day-jump-btn` trên mỗi ngày (hoặc nút "Mở ngày để khắc phục" trên ngày lỗi) gọi `jumpToDay(dateStr)`.
   - Thiết lập `elements.date.value = dateStr`, chuyển sang tab xem ngày (`setViewMode("daily")`), nạp dữ liệu và render timeline chi tiết, đặt focus vào `#timeline-heading`.
   - Live region thông báo: *"Đã mở lịch trình chi tiết ngày {Thứ}, {DD/MM/YYYY}."*.
-- **PASS — TC-W07: Cô lập lỗi ngày hỏng & Cam kết không sập (Corrupt Date Isolation & Zero Crash Guarantee):**
+- **ĐỐI CHIẾU MÃ — TC-W07: Cô lập lỗi ngày hỏng & Cam kết không sập (Corrupt Date Isolation & Zero Crash Guarantee):**
   - Khi một ngày chứa JSON hỏng cú pháp (`status: "corrupt_json"`) hoặc bản ghi không hợp lệ (`status: "invalid_records"` do `end <= start`, sai category, thiếu trường):
   - Ứng dụng không bị sập (Zero Crash Guarantee), bắt lỗi an toàn cho từng ngày.
   - Cột ngày bị lỗi hiển thị huy hiệu đỏ `<span class="badge badge-danger">Lỗi</span>` trên tiêu đề.
   - Khối nội dung ngày hiển thị thẻ `.day-corrupt-card` với thông điệp *"⚠ Dữ liệu ngày bị lỗi"* kèm nút *"Mở ngày để khắc phục"*.
   - Toàn bộ 6 ngày hợp lệ còn lại vẫn hiển thị bình thường và đầy đủ dữ liệu.
   - Bảng tổng kết tuần hiển thị cảnh báo phụ: *"⚠ Có K ngày bị lỗi dữ liệu (không tính vào tổng số)."*.
-- **PASS — TC-W08: Trạng thái rỗng ngày và toàn tuần (Empty States):**
+- **ĐỐI CHIẾU MÃ — TC-W08: Trạng thái rỗng ngày và toàn tuần (Empty States):**
   - Trạng thái rỗng ngày: ngày không có công việc hiển thị hộp `.day-empty-box` với văn bản *"Chưa có công việc"*.
   - Trạng thái rỗng toàn tuần: khi cả 7 ngày đều không có công việc (`totalWeeklyTasks === 0 && corruptDaysCount === 0`), hiển thị banner `.week-empty-state` với tiêu đề *"Tuần này chưa có công việc nào"*, mô tả dải tuần từ Thứ Hai đến Chủ Nhật, kèm nút `#week-start-monday-btn` có nhãn *"Thêm công việc cho Thứ Hai (DD/MM)"* chuyển thẳng sang xem ngày Thứ Hai và focus vào ô nhập tiêu đề `#task-title`.
-- **PASS — TC-W09: Audit DOM an toàn tuyệt đối (Strict Safe DOM Audit):**
+- **ĐỐI CHIẾU MÃ — TC-W09: Audit DOM an toàn tuyệt đối (Strict Safe DOM Audit):**
   - 100% phần tử động và văn bản tạo qua `document.createElement`, `node.textContent`, `node.setAttribute`, `node.className`, `node.classList`.
   - Tuyệt đối 0 lần sử dụng `innerHTML`, `insertAdjacentHTML`, `outerHTML`, hay `document.write`.
   - Bộ kiểm tra smoke check xác nhận: `assert 'innerHTML' not in js` đạt PASS.
-- **PASS — TC-W10: Bố cục thích ứng & Rà soát tràn ngang ở 320 px (Responsive 320px Review):**
+- **ĐỐI CHIẾU MÃ — TC-W10: Bố cục thích ứng & Rà soát tràn ngang ở 320 px (Responsive 320px Review):**
   - Desktop ($\ge$ 768 px): Lưới 7 cột `.weekly-grid` co giãn đều; tiêu đề và danh sách công việc hiển thị rõ ràng.
   - Mobile (320 px – 767 px): Accordion xếp tầng dọc 1 cột; nút trigger `.day-accordion-trigger` đạt chiều cao tối thiểu 48 px. Mặc định mở ngày hôm nay hoặc ngày đang chọn.
   - Chiều rộng `min(100% - 32px, 1120px) = 288px` ở màn hình 320 px.
   - Áp dụng `overflow-wrap: anywhere; min-width: 0;`, không phát sinh thanh cuộn ngang trang (`overflow-x` an toàn tuyệt đối).
-- **PASS — TC-W11: Kích thước mục tiêu cảm ứng tối thiểu 44 px (44px Minimum Interactive Targets):**
+- **ĐỐI CHIẾU MÃ — TC-W11: Kích thước mục tiêu cảm ứng tối thiểu 44 px (44px Minimum Interactive Targets):**
   - Nút tab chuyển chế độ xem: `.tab-btn` có `min-height: 44px; min-width: 44px;`.
   - Nút điều hướng tuần: `.week-nav-btn` có `min-height: 44px;`.
   - Nút thêm việc Thứ Hai: `#week-start-monday-btn` có `min-height: 44px;`.
@@ -374,21 +376,21 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
   - Nút tác vụ hàng ngày: Sửa/Xóa `.task-actions .btn` có `min-height: 44px;`.
   - Checkbox hoàn thành hàng ngày: Vùng nhãn `.completion-control label` có `min-width: 44px; min-height: 44px; display: inline-flex;`.
   - Nút kích hoạt sao chép và các nút trong dialog copy: đều đạt `min-height: 44px;`.
-- **PASS — TC-W12: Điểm móc kiểm thử công khai (Test Hook Interface via window.__weeklyEngine):**
+- **ĐỐI CHIẾU MÃ — TC-W12: Điểm móc kiểm thử công khai (Test Hook Interface via window.__weeklyEngine):**
   - Xuất bản đầy đủ đối tượng `window.__weeklyEngine` chứa các hàm logic thuần túy: `getWeekBoundaries`, `getAdjacentWeek`, `toISODateString`, `isValidStoredTask`, `readDateTasks`, `calculateWeeklyMetrics`, `toggleTaskCompletionInWeek`, `createWeeklyStorageObserver`.
   - Cho phép QA và các bài kiểm tra tự động thẩm định trực tiếp mà không cần can thiệp vào UI.
-- **PASS — TC-W13: Quan sát lượt ghi lưu trữ (Storage Write-Count Observations via createWeeklyStorageObserver):**
+- **ĐỐI CHIẾU MÃ — TC-W13: Số lượt ghi dự kiến (Storage Write-Count Observations via createWeeklyStorageObserver):**
   - Chuyển tab Ngày $\leftrightarrow$ Tuần: 0 lượt gọi `localStorage.setItem`.
   - Chuyển tuần trước / tuần sau / tuần này: 0 lượt gọi `localStorage.setItem`.
   - Nạp tuần có ngày trống / ngày lỗi: 0 lượt gọi `localStorage.setItem`.
   - Bật/tắt checkbox hoàn thành trên tuần: Đúng **1 lượt gọi** `localStorage.setItem` vào khóa ngày của công việc đó; **0 lượt gọi** vào 6 ngày còn lại.
-- **PASS — TC-W14: Hồi quy toàn diện các tính năng Lịch trình hàng ngày & Sao chép lịch (Full Regression):**
+- **ĐỐI CHIẾU MÃ — TC-W14: Hồi quy toàn diện các tính năng Lịch trình hàng ngày & Sao chép lịch (Full Regression):**
   - *Lịch trình hàng ngày:* Thêm/Sửa/Xóa công việc, xác thực tiêu đề và thời gian (bắt buộc kết thúc sau bắt đầu, từ chối giờ thiếu/đảo ngược/bằng nhau), phân loại Công ty/Cá nhân, mức ưu tiên, công việc mới mặc định `completed: false`, sửa giữ nguyên ID/createdAt/completed, native `window.confirm` cho xóa, checkbox hoàn thành 44×44 px, sắp xếp timeline theo thứ tự thời gian tăng dần, cảnh báo trùng khoảng giờ nghiêm ngặt (tiếp xúc biên không bị trùng, non-blocking save), phân tách dữ liệu độc lập theo khóa `lich-trinh-hang-ngay:v1:YYYY-MM-DD`, cô lập dữ liệu JSON hỏng.
   - *Sao chép lịch sang ngày khác:* Native `<dialog>`, focus trap, phím Escape và nút Hủy hoàn trả focus về trigger, kiểm tra ngày đích khác ngày nguồn, từ chối ngày nguồn rỗng, định danh 4 trường `[title.trim(), start, end, category]` loại trừ priority/completed, khử trùng lặp nội bộ nguồn và trùng lặp ngày đích, cấp ID mới, createdAt mới, reset `completed: false`, cảnh báo trùng khoảng giờ nghiêm ngặt (tiếp xúc biên không tính trùng, non-blocking save), bảo toàn 100% bản ghi cũ ngày đích, cam kết Zero-Write khi toàn bộ trùng lặp hoặc ngày đích hỏng cấu trúc, chống stale preview tại thời điểm xác nhận, giữ nguyên ngày nguồn đang xem, thông báo live region đầy đủ.
 
-### 3. Quan sát Số lượt ghi Lưu trữ (Storage Write-Count Observations)
+### 3. Số lượt ghi dự kiến từ việc đối chiếu mã (chưa đo bằng instrumentation)
 
-| Kịch bản thao tác | Khóa mục tiêu | Số lượt ghi thực tế | Ghi chú an toàn |
+| Kịch bản thao tác | Khóa mục tiêu | Số lượt ghi dự kiến theo mã | Ghi chú an toàn |
 | :--- | :--- | :---: | :--- |
 | **Chuyển chế độ xem Ngày sang Tuần** | Không có | **0** | Chỉ đọc on-the-fly từ 7 khóa ngày |
 | **Bấm "Tuần trước", "Tuần sau", "Tuần này"** | Không có | **0** | Chỉ tính toán biên tuần và đọc dữ liệu |
@@ -409,7 +411,7 @@ Phần này ghi nhận kết quả kiểm thử độc lập đối với tính 
 - **Độc lập hoàn toàn:** Không sử dụng thư viện ngoài, không có API mạng hay dịch vụ bên ngoài; không đồng bộ Google Calendar hay Notion.
 
 ### 5. Giới hạn trung thực (Honest Limitations)
-1. **Phạm vi kiểm thử:** Kiểm thử của QA agent được thực hiện thông qua rà soát nhánh mã nguồn chi tiết (code-path inspection), rà soát tĩnh (static review), smoke check cú pháp (`check_schedule.py`), và hook kiểm thử engine (`window.__weeklyEngine`). Ma trận kiểm thử tự động đa trình duyệt (cross-browser automation matrix) chưa được triển khai.
+1. **Phạm vi kiểm thử:** Kiểm thử của QA agent được thực hiện thông qua rà soát nhánh mã nguồn chi tiết (code-path inspection), rà soát tĩnh (static review), smoke check cú pháp (`check_schedule.py`); agent chưa gọi hook kiểm thử engine (`window.__weeklyEngine`). Ma trận kiểm thử tự động đa trình duyệt (cross-browser automation matrix) chưa được triển khai.
 2. **Lịch trong ngày:** Ứng dụng chỉ hỗ trợ công việc bắt đầu và kết thúc trong cùng một ngày (chưa hỗ trợ công việc xuyên qua nửa đêm).
 3. **Lưu trữ cục bộ:** Toàn bộ dữ liệu nằm trên `localStorage` của trình duyệt hiện tại; không có tài khoản, sao lưu đám mây hay đồng bộ Google Calendar/Notion.
 4. **Hộp thoại native:** Xác nhận xóa dựa vào `window.confirm` của từng trình duyệt.
