@@ -724,4 +724,49 @@ Không bao giờ để khoảng trống vô nghĩa hoặc tự ý tạo dữ li�
      - `element.classList.add(...)`
    - **Tuyệt đối cấm** sử dụng `innerHTML`, `insertAdjacentHTML`, `outerHTML`, hoặc `document.write` ở bất kỳ dòng mã nào.
 
+---
+
+## 16. Kiến trúc dữ liệu và giải thuật (01/10/2026) — Quản lý công việc tuần
+
+Toàn bộ đặc tả kiến trúc dữ liệu và giải thuật cho tính năng quản lý công việc tuần được chuẩn hóa chi tiết tại tệp [`WEEKLY_ARCHITECTURE.md`](file:///WEEKLY_ARCHITECTURE.md). Dưới đây là các định nghĩa và ràng buộc cốt lõi dành cho các vai trò triển khai (Frontend), kiểm thử (QA) và nghiệm thu (Reviewer):
+
+### 16.1. Thuật toán tính toán biên tuần tất định (Deterministic Week Boundaries)
+- Chuẩn quy ước: Bắt đầu từ **Thứ Hai (Monday)** và kết thúc vào **Chủ Nhật (Sunday)** theo ISO-8601 và văn hóa làm việc Việt Nam.
+- Hàm tính toán: `getWeekBoundaries(dateStr)` nhận vào bất kỳ chuỗi ngày ISO `YYYY-MM-DD` hợp lệ nào và sinh ra chính xác 7 chuỗi ngày liên tiếp:
+  - Khắc phục triệt để lỗi múi giờ bằng cách phân tích thủ công các số nguyên `[year, month, day]` và khởi tạo 12:00 trưa cục bộ.
+  - Xử lý hoàn hảo mọi biên tháng, biên năm thường (28/02) và năm nhuận (29/02/2024), cũng như biên giao thừa chuyển năm (ví dụ 28/12/2026 – 03/01/2027).
+
+### 16.2. Hợp đồng lưu trữ & Tổng hợp động tại thời điểm chạy (Storage Contract & On-the-Fly Aggregation)
+- **Nguồn chân lý duy nhất (Single Source of Truth):** Toàn bộ dữ liệu tuần được đọc và tổng hợp trực tiếp từ các khóa ngày sẵn có: `STORAGE_PREFIX + YYYY-MM-DD` (`STORAGE_PREFIX = "lich-trinh-hang-ngay:v1:"`).
+- **Cam kết cấm tạo khóa tuần riêng:** Tuyệt đối không tạo các khóa lưu trữ cấp tuần (như `week:YYYY-Wxx`) nhằm loại trừ hoàn toàn nguy cơ bất đồng bộ bậc hai (secondary desync) và lãng phí dung lượng.
+- **Không ghi khi nạp tuần:** Quá trình tải, chuyển đổi tab hoặc điều hướng tuần chỉ đọc dữ liệu (`Δ(localStorage.setItem) = 0`).
+
+### 16.3. Bộ nạp dữ liệu nghiêm ngặt & Cơ chế cô lập lỗi (Strict Date Loader & Fault Isolation)
+- Hàm `readDateTasks(dateStr)` thanh tra độc lập từng ngày và trả về cấu trúc phân định 4 trạng thái:
+  1. `missing`: Khóa chưa từng tồn tại; trả về mảng rỗng hợp lệ (`tasks = []`).
+  2. `valid`: JSON parse thành công thành mảng và 100% bản ghi vượt qua 10 tiêu chí kiểm định của `isValidStoredTask(raw)`.
+  3. `corrupt_json`: JSON hỏng cú pháp hoặc cấu trúc gốc không phải mảng.
+  4. `invalid_records`: Có ít nhất 1 bản ghi thiếu trường, sai định dạng giờ hoặc sai logic thời gian.
+- **Nguyên tắc cô lập lỗi (Fault Isolation):** Sự cố hỏng dữ liệu tại một ngày bất kỳ (ví dụ Thứ Tư) chỉ hiển thị thẻ cảnh báo lỗi `.day-corrupt-card` tại cột của ngày đó kèm nút mở ngày khắc phục; tuyệt đối không làm sập giao diện tuần và 6 ngày hợp lệ còn lại vẫn kết xuất bình thường (Zero Crash Guarantee).
+
+### 16.4. Định nghĩa số liệu tuần & Bất biến toán học (Weekly Metrics & Formal Invariants)
+- **Tổng công việc (`totalWeeklyTasks`):** Tổng số công việc từ tất cả các ngày hợp lệ trong tuần.
+- **Đã hoàn thành (`completedWeeklyTasks`):** Tổng số công việc có `completed === true` từ các ngày hợp lệ.
+- **Còn lại (`remainingWeeklyTasks`):** $\text{totalWeeklyTasks} - \text{completedWeeklyTasks}$.
+- **Tỷ lệ hoàn thành (`completionRate`):** $\text{round}((\text{completedWeeklyTasks} / \text{totalWeeklyTasks}) \times 100)\%$ (trả về 0% nếu tổng số việc bằng 0).
+- **Cập nhật thời gian thực:** Cập nhật ngay lập tức các chỉ số trên giao diện khi trạng thái hoàn thành của bất kỳ công việc nào thay đổi.
+
+### 16.5. Hợp đồng đột biến hoàn thành (Completion Mutation Contract)
+- Thao tác bật/tắt hoàn thành trên thẻ công việc thu gọn gọi hàm `toggleTaskCompletionInWeek(taskDate, taskId)`:
+  1. Tái đọc khóa ngày của công việc đó; chặn thao tác nếu ngày đó bị hỏng cấu trúc (0 lượt ghi).
+  2. Đảo giá trị `completed` (`true` ↔ `false`).
+  3. Giữ nguyên 100% các trường còn lại (`id`, `title`, `start`, `end`, `category`, `priority`, `createdAt`) và thứ tự các công việc khác trong ngày.
+  4. Thực hiện đúng **1 lượt ghi** duy nhất vào khóa ngày đó; **0 lượt ghi** vào bất kỳ khóa ngày nào khác.
+  5. Phát thông báo live region: *“Đã đánh dấu hoàn thành công việc: {tiêu đề} (ngày {DD/MM/YYYY}).”* hoặc *“Đã bỏ đánh dấu hoàn thành: {tiêu đề} (ngày {DD/MM/YYYY}).”*.
+
+### 16.6. Điểm móc kiểm thử công khai (`window.__weeklyEngine`) & Bất biến kiểm chứng
+- Động cơ tuần phơi bày API thuần túy qua `window.__weeklyEngine` gồm: `getWeekBoundaries`, `getAdjacentWeek`, `toISODateString`, `isValidStoredTask`, `readDateTasks`, `calculateWeeklyMetrics`, `toggleTaskCompletionInWeek`, và `createWeeklyStorageObserver`.
+- Toàn bộ 12 bất biến toán học và công cụ quan sát số lần ghi không lộ dữ liệu người dùng được quy định chi tiết tại [`WEEKLY_ARCHITECTURE.md`](file:///WEEKLY_ARCHITECTURE.md).
+
+
 
