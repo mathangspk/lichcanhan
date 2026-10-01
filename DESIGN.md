@@ -169,3 +169,129 @@ Ví dụ microcopy được phép:
 - Timeline đúng thứ tự thời gian; card thể hiện giờ, title, category, priority, trạng thái và đủ điều khiển.
 - Dữ liệu ví dụ (nếu có) được ghi nhãn rõ và chưa hoàn thành; không suy đoán hoàn thành.
 - Không dependency, network, tích hợp/sync; không dùng `innerHTML`, `insertAdjacentHTML` hoặc `document.write` trong JavaScript. Nội dung người dùng chỉ đưa vào DOM bằng `textContent`, thuộc tính an toàn và API tạo node.
+
+## 13. Bổ sung thiết kế tương tác (01/10/2026) — Sao chép lịch sang ngày khác
+
+Phần bổ sung này xác định đặc tả thiết kế tương tác chi tiết cho tính năng **“Sao chép lịch sang ngày khác”**, hoàn toàn kế thừa hệ thống thị giác, quy tắc bố cục responsive, chuẩn tiếp cận và các ràng buộc DOM an toàn hiện có của ứng dụng (được nghiệm thu ngày 30/09/2026). Không làm thay đổi hay phá vỡ các chức năng đã có.
+
+### 13.1. Vị trí, hình thức và trạng thái của nút kích hoạt (Copy Trigger)
+
+1. **Vị trí hiển thị:**
+   - Đặt trong khung chọn ngày (`section.date-panel`), nằm cạnh khối điều khiển chọn ngày (`div.date-control`) hoặc được gom vào cụm hành động ngày `div.date-actions`.
+   - Trên desktop/tablet: Nằm ngang hàng hoặc liền kề với trường chọn ngày xem lịch, căn chỉnh thẳng hàng để người dùng thấy rõ đây là hành động thao tác trên ngày đang xem.
+   - Trên mobile (320–767 px): Xếp chồng tự nhiên theo chiều dọc, chiếm toàn bộ chiều rộng (hoặc co giãn linh hoạt theo flex-wrap), đảm bảo không gây tràn chiều ngang.
+
+2. **Cấu trúc ngữ nghĩa & Thuộc tính:**
+   - Phần tử: `<button type="button" class="btn btn-secondary" id="copy-schedule-trigger">`
+   - Nhãn nút: **“Sao chép lịch sang ngày khác”**
+   - Kích thước tương tác: Chiều cao tối thiểu 44 px (`min-height: 44px; padding: 9px 15px;`), phông chữ 750, viền `#8b99aa`, nền trắng, hover `#eef2f7`, `:focus-visible` viền outline 3 px màu `#0b63ce`.
+   - Accessible name: `aria-haspopup="dialog"`, `aria-controls="copy-schedule-dialog"`.
+
+3. **Trạng thái của nút kích hoạt:**
+   - **Trạng thái khả dụng (Enabled):** Khi ngày nguồn đang xem có ít nhất 1 công việc hợp lệ (`tasks.length > 0`) và không có lỗi đọc dữ liệu hỏng. Nút ở trạng thái bình thường, sẵn sàng bấm mở hộp thoại.
+   - **Trạng thái vô hiệu hóa khi ngày nguồn rỗng (Empty Source):** Khi ngày nguồn không có công việc nào (`tasks.length === 0`), nút có thuộc tính `disabled`, giảm độ mờ (`opacity: 0.55`), `cursor: not-allowed`, kèm tooltip/nhãn giải thích: `title="Ngày hiện tại chưa có công việc để sao chép"`.
+   - **Trạng thái khi ngày nguồn có dữ liệu hỏng (Corrupt Source):** Nút bị vô hiệu hóa (`disabled`) kèm `title="Dữ liệu ngày nguồn bị hỏng, không thể sao chép"`.
+
+### 13.2. Hộp thoại native `<dialog>` và khả năng tiếp cận bàn phím
+
+1. **Cấu trúc ngữ nghĩa HTML:**
+   - Sử dụng thẻ HTML5 chuẩn: `<dialog id="copy-schedule-dialog" class="panel copy-dialog" aria-labelledby="copy-dialog-title" aria-describedby="copy-dialog-desc">`.
+   - Khởi tạo mở bằng phương thức native `dialog.showModal()` để tự động kích hoạt cơ chế focus trap của trình duyệt, ngăn tương tác với nội dung nền phía sau.
+   - Lớp phủ nền (`::backdrop`):
+     ```css
+     dialog.copy-dialog::backdrop {
+       background: rgba(23, 32, 51, 0.45);
+       backdrop-filter: blur(2px);
+     }
+     ```
+   - Định kiểu hộp thoại:
+     - Căn giữa màn hình, viền `1px solid var(--border)`, bo góc `var(--radius)` (14 px), nền `var(--surface)` (`#ffffff`), đổ bóng `var(--shadow)`.
+     - Kích thước responsive: `width: min(100% - 32px, 520px); max-height: calc(100vh - 48px); overflow-y: auto; padding: 24px;`.
+     - Ở màn hình hẹp (<= 390 px): padding 18 px, toàn bộ nút dàn 100% chiều rộng.
+
+2. **Cấu trúc nội dung bên trong `<dialog>`:**
+   - **Tiêu đề hộp thoại:** `<h2 id="copy-dialog-title">Sao chép lịch sang ngày khác</h2>` (font-size 1.35rem, font-weight 700).
+   - **Mô tả ngữ cảnh:** `<p id="copy-dialog-desc" class="dialog-intro">Sao chép toàn bộ công việc từ ngày đang xem sang một ngày đích mới.</p>`
+   - **Thông tin ngày nguồn:** Hộp thông tin nhẹ hiển thị ngày nguồn và số lượng công việc:
+     - Vi văn bản: **“Ngày nguồn: {Thứ, DD/MM/YYYY} ({N} công việc)”** (ví dụ: *“Ngày nguồn: Thứ Tư, 30/09/2026 (3 công việc)”*).
+   - **Biểu mẫu sao chép:** `<form id="copy-schedule-form" method="dialog" novalidate>`:
+     - Trường chọn ngày đích:
+       - `<label for="copy-destination-date">Chọn ngày đích</label>` (rõ ràng `for`/`id`).
+       - `<input id="copy-destination-date" name="destinationDate" type="date" required aria-describedby="copy-dest-hint copy-dest-error">`.
+       - `<span class="hint" id="copy-dest-hint">Chọn ngày khác với ngày nguồn ({YYYY-MM-DD}).</span>`.
+       - `<span class="field-error" id="copy-dest-error"></span>`.
+     - **Khu vực xem trước (Live Preview Panel):** Phân vùng `<section id="copy-preview-section" aria-labelledby="copy-preview-heading" aria-live="polite">` (chi tiết ở mục 13.3).
+     - **Cụm nút hành động (Dialog Actions):**
+       - `<div class="actions copy-actions">`
+       - Nút Hủy: `<button type="button" class="btn btn-secondary" id="copy-cancel-button">Hủy</button>`
+       - Nút Xác nhận: `<button type="submit" class="btn btn-primary" id="copy-submit-button">Xác nhận sao chép</button>`
+
+3. **Điều hướng bàn phím và quản lý Focus:**
+   - Khi mở hộp thoại: Chuyển focus ngay lập tức tới trường chọn ngày đích (`#copy-destination-date`).
+   - Phím `Tab` / `Shift+Tab`: Chu trình di chuyển focus chỉ xoay vòng bên trong hộp thoại (Destination Date Input -> Cancel Button -> Submit Button).
+   - Phím `Escape`: Kích hoạt sự kiện `cancel` native của `<dialog>`, đóng hộp thoại và hoàn trả focus ngay lập tức về nút kích hoạt `#copy-schedule-trigger`.
+   - Nút **“Hủy”**: Khi nhấn, đóng hộp thoại (`dialog.close()`), dọn dẹp trạng thái xem trước và hoàn trả focus về `#copy-schedule-trigger`.
+   - Không gây cuộn trang ngoài ý muốn khi mở hoặc đóng hộp thoại.
+
+### 13.3. Khu vực xem trước kết quả sao chép (Live Preview)
+
+Khu vực xem trước xuất hiện động ngay bên dưới trường ngày đích khi người dùng đã chọn một ngày đích hợp lệ:
+
+1. **Bố cục các số liệu đếm (Preview Counts):**
+   Gồm 3 thông số định lượng trực quan, rõ ràng, không mập mờ:
+   - **Sẽ thêm mới:** Thẻ thống kê với nhãn **“Sẽ thêm mới: {X} công việc”** (màu xanh thành công `#146c45`, nền `#edf9f2`). Đây là số lượng công việc từ ngày nguồn sẽ được tạo mới tại ngày đích.
+   - **Bỏ qua (trùng lặp):** Thẻ thống kê với nhãn **“Bỏ qua (trùng lặp): {Y} công việc”** (màu trung tính `#526078`, nền `#f1f5f9`). Đây là các công việc trùng cả 4 thông tin (tiêu đề, giờ bắt đầu, giờ kết thúc, danh mục) đã có sẵn ở ngày đích hoặc trùng lặp nội bộ trong ngày nguồn.
+   - **Trùng khoảng giờ với lịch hiện có:** Thẻ thống kê với nhãn **“Trùng giờ ở ngày đích: {Z} công việc”** (màu cảnh báo `#714500`, nền `#fff7d6`). Đây là các công việc trong số {X} mục mới có khoảng thời gian giao nhau nghiêm ngặt (`startA < endB && startB < endA`) với lịch đã có ở ngày đích. Tiếp xúc tại điểm biên (`endA === startB`) **không** tính là trùng giờ.
+
+2. **Cảnh báo giải thích chi tiết:**
+   - Nếu `Z > 0`: Hiển thị banner cảnh báo:
+     - **“Chú ý trùng khoảng giờ: Có {Z} công việc trùng giờ với lịch đã có tại ngày đích. Các công việc này vẫn sẽ được sao chép và gắn huy hiệu ‘Trùng giờ’.”**
+   - Nếu `Y > 0`: Hiển thị ghi chú:
+     - **“{Y} công việc có cùng tiêu đề, thời gian và danh mục đã tồn tại ở ngày đích nên sẽ không được thêm lần thứ hai.”**
+
+### 13.4. Các trạng thái giao diện chi tiết (UI States) & Vi văn bản (Microcopy)
+
+| Tình huống giao diện | Trạng thái điều khiển & Trình bày thị giác | Vi văn bản hiển thị (Microcopy) | Hành vi nút Xác nhận & Lưu trữ |
+| :--- | :--- | :--- | :--- |
+| **1. Chưa chọn ngày đích** | Trường ngày trống, vùng xem trước ẩn hoặc hiển thị chỉ dẫn. | Hướng dẫn: *“Vui lòng chọn ngày đích để xem trước kết quả.”* | Nút **“Xác nhận sao chép”** bị vô hiệu hóa (`disabled`). Không có ghi dữ liệu. |
+| **2. Ngày đích trùng ngày nguồn** (Same-day error) | Trường ngày có `aria-invalid="true"`, viền đỏ nguy hiểm (`--danger`), thông báo lỗi hiển thị ngay dưới trường. Vùng xem trước ẩn. | Lỗi: *“⚠ Ngày đích phải khác ngày nguồn ({YYYY-MM-DD}).”* | Nút **“Xác nhận sao chép”** bị vô hiệu hóa (`disabled`). Chặn hoàn toàn thao tác gửi. |
+| **3. Ngày đích không hợp lệ** (Invalid format) | Trường ngày có `aria-invalid="true"`. | Lỗi: *“⚠ Vui lòng chọn một ngày hợp lệ.”* | Nút **“Xác nhận sao chép”** bị vô hiệu hóa (`disabled`). |
+| **4. Ngày đích có dữ liệu hỏng** (Corrupt destination) | Banner lỗi màu đỏ (`notice error`, `role="alert"`). Vùng đếm xem trước bị ẩn hoặc khóa. | Lỗi: *“⚠ Dữ liệu ngày đích trong bộ nhớ trình duyệt bị lỗi cấu trúc (JSON hỏng hoặc bản ghi không hợp lệ). Thao tác sao chép bị chặn để bảo vệ dữ liệu.”* | Nút **“Xác nhận sao chép”** bị vô hiệu hóa (`disabled`). **Quy tắc Zero-write:** Tuyệt đối không ghi đè hay thay đổi bất kỳ byte nào vào `localStorage`. |
+| **5. Toàn bộ là công việc trùng lặp** (All-duplicates / Zero-write) | Đếm xem trước: Thêm mới: **0**, Bỏ qua: **{Y}**. Banner thông tin cảnh báo nhẹ màu vàng cam. | Thông báo: *“Tất cả công việc từ ngày nguồn đều đã có ở ngày đích. Sẽ không có công việc nào được thêm mới và không ghi vào bộ nhớ.”* | Nút **“Xác nhận sao chép”** bị vô hiệu hóa (`disabled`) hoặc khi nhấn sẽ đóng hộp thoại mà không thực hiện thao tác `localStorage.setItem` nào (**Zero-write guarantee**). |
+| **6. Ngày đích trống hoặc có công việc không trùng** (Hợp lệ hoàn toàn) | Đếm xem trước: Thêm mới: **{X}**, Bỏ qua: **{Y}**, Trùng giờ: **0**. Banner tích cực hoặc thẻ đếm rõ ràng. | Ghi chú: *“Sẵn sàng sao chép {X} công việc sang ngày {ngày đích}.”* | Nút **“Xác nhận sao chép”** kích hoạt (`enabled`). |
+| **7. Có công việc trùng khoảng giờ tại đích** (Strict overlap non-blocking) | Thẻ đếm Trùng giờ: **{Z}**. Banner cảnh báo màu vàng cam (`notice warning`, `role="status"`). | Cảnh báo: *“Có {Z} công việc trùng giờ với lịch đã có tại ngày đích. Các công việc này vẫn sẽ được sao chép và gắn huy hiệu cảnh báo.”* | Nút **“Xác nhận sao chép”** vẫn **kích hoạt** (`enabled`). Đây là cảnh báo tương tác, không phải lỗi chặn. |
+| **8. Sao chép thành công** | Hộp thoại tự động đóng. **Giữ nguyên ngày nguồn đang xem** trên giao diện chính. Vùng live region phát thông báo thành công. Focus trả về nút kích hoạt. | Live region (`#app-status`): *“Đã sao chép thành công {X} công việc sang ngày {ngày đích}. Ngày xem lịch vẫn là {ngày nguồn}.”* (Nếu có Z > 0 trùng giờ: *“Đã sao chép thành công {X} công việc sang ngày {ngày đích} ({Z} công việc trùng giờ). Ngày xem lịch vẫn là {ngày nguồn}.”*). | Dữ liệu ngày đích được lưu an toàn. Các công việc đích cũ được giữ nguyên 100%. Các công việc mới nhận ID mới, `createdAt` mới, và luôn có `completed: false`. |
+| **9. Dữ liệu ngày đích thay đổi trước khi xác nhận** (Stale preview) | Khi người dùng nhấn Xác nhận, ứng dụng đọc lại dữ liệu ngày đích và phát hiện thay đổi hoặc bị hỏng ngoài dự kiến. | Cảnh báo: *“Dữ liệu ngày đích đã thay đổi hoặc không hợp lệ. Vui lòng xem lại kết quả tính toán mới trước khi xác nhận.”* | Hủy lệnh ghi, tính toán lại preview tại chỗ, yêu cầu người dùng xác nhận lại với dữ liệu mới. |
+
+### 13.5. Quy tắc dữ liệu và tính toán dưới góc độ trải nghiệm người dùng
+
+1. **Định danh trùng lặp 4 trường (Duplicate Identity):**
+   - Người dùng xem một công việc là "trùng lặp" khi khớp chính xác cả 4 thuộc tính: **Tiêu đề** (`title`), **Giờ bắt đầu** (`start`), **Giờ kết thúc** (`end`), và **Danh mục** (`category`).
+   - Mức ưu tiên (`priority`) và trạng thái hoàn thành (`completed`) **không** nằm trong định danh trùng lặp.
+   - Các công việc trùng lặp trong chính ngày nguồn (nội bộ nguồn lặp lại) cũng được gom lại để chỉ thêm 1 bản ghi duy nhất sang ngày đích.
+
+2. **Bảo tồn tính toàn vẹn dữ liệu ngày đích:**
+   - Tất cả các công việc hợp lệ đang có ở ngày đích phải được giữ nguyên vẹn 100% (không xóa, không ghi đè, không thay đổi ID/thời gian của chúng).
+   - Công việc mới sao chép sang: Giữ nguyên `title`, `start`, `end`, `category`, `priority`; được cấp `id` duy nhất mới (UUID / chuỗi ngẫu nhiên); thời điểm tạo `createdAt` mới; và trạng thái hoàn thành **luôn khởi tạo là `false`** (không bao giờ suy đoán hoàn thành).
+
+3. **Cảnh báo trùng giờ nghiêm ngặt (Strict Overlap vs Boundary Touch):**
+   - Hai khoảng giờ [A_start, A_end] và [B_start, B_end] chỉ trùng nhau khi `A_start < B_end && B_start < A_end`.
+   - Trường hợp tiếp xúc biên: `A_end === B_start` hoặc `B_end === A_start` (ví dụ 09:00–10:00 và 10:00–11:00) được coi là liền kề hợp lệ, **không** tính là trùng giờ và không tăng số đếm {Z}.
+
+### 13.6. Tiêu chí tiếp cận, an toàn DOM và kích thước tương tác
+
+1. **Ràng buộc an toàn DOM (Strict Safe DOM):**
+   - Mọi thông tin động trong hộp thoại (tên ngày, số lượng công việc, cảnh báo trùng giờ, danh sách tiêu đề) tuyệt đối phải được tạo bằng các node DOM an toàn: `document.createElement`, gán thuộc tính `setAttribute`, và gán văn bản bằng `node.textContent`.
+   - Tuyệt đối **không** dùng `innerHTML`, `insertAdjacentHTML`, `outerHTML` hoặc `document.write` ở bất kỳ đoạn mã JavaScript nào.
+
+2. **Kích thước mục tiêu tối thiểu (44×44 CSS px):**
+   - Nút kích hoạt `#copy-schedule-trigger`: chiều cao tối thiểu 44 px.
+   - Trường chọn ngày `#copy-destination-date`: chiều cao tối thiểu 44 px.
+   - Các nút trong hộp thoại (`#copy-cancel-button`, `#copy-submit-button`): chiều cao tối thiểu 44 px, đệm tay rộng rãi.
+
+3. **Tương phản màu & Hiển thị Focus:**
+   - Tất cả văn bản đạt tỷ lệ tương phản tối thiểu WCAG AA (tối thiểu 4.5:1 với văn bản thường, 3:1 với văn bản lớn và thành phần điều khiển).
+   - Mọi nút bấm và trường nhập liệu đều có `:focus-visible` với viền outline 3 px màu `#0b63ce` cách 2 px (`outline-offset: 2 px`).
+
+4. **Hành vi Responsive (320 px đến Desktop):**
+   - Ở màn hình hẹp (320 px): `<dialog>` có lề hai bên an toàn 16 px (`width: calc(100% - 32px)`), các nút hành động xếp chồng theo chiều dọc (`flex-direction: column; width: 100%`), không xuất hiện thanh cuộn ngang trang hay hộp thoại.
