@@ -407,6 +407,439 @@
       padding: 9px 18px;
     }
 
+    /* View mode switcher */
+    .view-mode-nav {
+      margin-bottom: 22px;
+    }
+
+    .view-mode-tabs {
+      display: inline-flex;
+      background: #e2e8f0;
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 10px 22px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: #edf2f7;
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--text);
+      font-weight: 750;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Week navigation */
+    .week-navigation-panel {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .week-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .week-heading-group {
+      min-width: 0;
+    }
+
+    .week-range-title {
+      margin-bottom: 4px;
+      font-size: 1.25rem;
+      line-height: 1.25;
+    }
+
+    .week-range-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .week-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .week-nav-btn {
+      min-height: 44px;
+      padding: 9px 16px;
+      white-space: nowrap;
+    }
+
+    /* Weekly summary metrics panel */
+    .weekly-summary-panel {
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .summary-title {
+      margin-bottom: 14px;
+      font-size: 1.15rem;
+    }
+
+    .weekly-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .metric-subtext {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .metric-card.metric-completed {
+      border-color: #a3e0be;
+      background: var(--success-bg);
+    }
+
+    .metric-card.metric-completed .metric-value {
+      color: var(--success);
+    }
+
+    #weekly-corrupt-warning {
+      margin-top: 14px;
+      margin-bottom: 0;
+    }
+
+    /* Week empty state */
+    .week-empty-state {
+      padding: 36px 20px;
+      text-align: center;
+      margin-bottom: 24px;
+      background: #f8fafc;
+      border: 1px dashed #9eabbc;
+      border-radius: var(--radius);
+    }
+
+    .week-empty-title {
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+    }
+
+    .week-empty-desc {
+      margin: 0 auto 18px;
+      color: var(--muted);
+      max-width: 500px;
+    }
+
+    #week-start-monday-btn {
+      min-height: 44px;
+      padding: 10px 20px;
+    }
+
+    /* 7-day layout */
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+      width: 100%;
+    }
+
+    .day-column {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(23, 32, 51, 0.04);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .day-column.is-today {
+      border-top: 4px solid var(--primary);
+      background: #f8faff;
+    }
+
+    .day-column.is-selected {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+    }
+
+    .day-column-header {
+      border-bottom: 1px solid #eef2f6;
+      background: #fafbfc;
+    }
+
+    .day-accordion-trigger {
+      display: block;
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 14px 10px 10px;
+      text-align: center;
+      color: inherit;
+    }
+
+    .accordion-title-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .day-name {
+      font-weight: 750;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .day-date {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .day-count-badge {
+      background: #e8eefc;
+      color: #173ea8;
+      border-color: #cbdcf8;
+      font-size: 0.76rem;
+      padding: 2px 7px;
+    }
+
+    .badge-today {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-size: 0.72rem;
+      padding: 2px 6px;
+    }
+
+    .badge-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: var(--danger);
+      font-size: 0.72rem;
+      padding: 2px 6px;
+    }
+
+    .accordion-icon {
+      display: none;
+    }
+
+    .day-accordion-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .day-panel-actions {
+      margin-bottom: 4px;
+    }
+
+    .day-jump-btn {
+      width: 100%;
+      min-height: 44px;
+      padding: 7px 10px;
+      font-size: 0.85rem;
+    }
+
+    .jump-mobile-text {
+      display: none;
+    }
+
+    .day-tasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .day-empty-box {
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 18px 8px;
+      text-align: center;
+    }
+
+    .day-empty-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .day-corrupt-card {
+      padding: 12px;
+      border: 1px solid var(--danger);
+      background: var(--danger-bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .day-corrupt-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--danger);
+    }
+
+    .day-corrupt-card p {
+      margin: 0 0 10px;
+      color: var(--danger);
+      font-size: 0.82rem;
+    }
+
+    /* Compact task card in week view */
+    .compact-task-card {
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      border-radius: 9px;
+      background: #ffffff;
+      padding: 10px 10px 6px;
+      overflow-wrap: anywhere;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .compact-task-card.company { border-left-color: var(--company); }
+    .compact-task-card.personal { border-left-color: var(--personal); }
+    .compact-task-card.completed {
+      background: var(--success-bg);
+      border-color: #c3e6d3;
+    }
+
+    .compact-task-card.completed .compact-task-title {
+      text-decoration: line-through;
+      text-decoration-thickness: 1.5px;
+      color: #3b5748;
+    }
+
+    .compact-task-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .compact-task-time {
+      font-size: 0.82rem;
+      font-weight: 750;
+      color: var(--muted);
+    }
+
+    .compact-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .badge-sm {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+    }
+
+    .compact-task-title {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .compact-completion-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      margin: 2px 0 0;
+    }
+
+    .compact-checkbox {
+      flex: 0 0 auto;
+      width: 20px;
+      min-height: 20px;
+      height: 20px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .compact-completion-label {
+      display: inline-flex;
+      align-items: center;
+      min-width: 44px;
+      min-height: 44px;
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 650;
+      line-height: 1.25;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    @media (min-width: 768px) {
+      .day-accordion-panel {
+        display: flex !important;
+        flex-direction: column;
+      }
+      .day-accordion-trigger {
+        pointer-events: none;
+        cursor: default;
+      }
+      .accordion-icon {
+        display: none !important;
+      }
+      .jump-desktop-text {
+        display: inline;
+      }
+      .jump-mobile-text {
+        display: none;
+      }
+    }
+
     @media (max-width: 767px) {
       .header-inner, main, .footer-inner { width: min(100% - 32px, 1120px); }
       .header-inner { padding: 26px 0 24px; }
@@ -418,6 +851,45 @@
       .app-grid { grid-template-columns: 1fr; gap: 20px; }
       .form-panel, .timeline-panel { padding: 18px; }
       .timeline-header { align-items: flex-start; flex-direction: column; gap: 8px; }
+
+      /* Weekly responsive styles */
+      .view-mode-tabs { width: 100%; display: flex; }
+      .tab-btn { flex: 1 1 50%; padding: 10px 12px; }
+      .week-nav-header { flex-direction: column; align-items: stretch; gap: 12px; }
+      .week-nav-actions { width: 100%; display: flex; }
+      .week-nav-btn { flex: 1 1 0; padding: 9px 8px; font-size: 0.85rem; }
+      .weekly-metrics-grid { grid-template-columns: 1fr; gap: 10px; }
+      .weekly-grid { grid-template-columns: 1fr; gap: 12px; }
+
+      .day-accordion-trigger {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 48px;
+        padding: 14px;
+        text-align: left;
+      }
+      .accordion-title-wrap {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .accordion-icon {
+        display: inline-block;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .day-column:not(.is-open) .day-accordion-panel {
+        display: none;
+      }
+      .day-column.is-open .day-accordion-panel {
+        display: flex;
+        padding: 0 14px 14px;
+      }
+      .jump-desktop-text { display: none; }
+      .jump-mobile-text { display: inline; }
     }
 
     @media (max-width: 480px) {
@@ -458,95 +930,172 @@
   </header>
 
   <main>
-    <section class="panel date-panel" aria-labelledby="date-heading">
-      <div>
-        <h2 id="date-heading">Chọn ngày</h2>
-        <p>Mỗi ngày có một lịch riêng được lưu trên thiết bị này.</p>
+    <nav class="view-mode-nav" aria-label="Chế độ xem lịch">
+      <div class="view-mode-tabs" id="view-mode-tabs" role="tablist" aria-orientation="horizontal">
+        <button type="button" 
+                role="tab" 
+                id="tab-view-daily" 
+                class="tab-btn active" 
+                aria-selected="true" 
+                aria-controls="daily-view-panel" 
+                tabindex="0">
+          Xem theo ngày
+        </button>
+        <button type="button" 
+                role="tab" 
+                id="tab-view-weekly" 
+                class="tab-btn" 
+                aria-selected="false" 
+                aria-controls="weekly-view-panel" 
+                tabindex="-1">
+          Xem theo tuần
+        </button>
       </div>
-      <div class="date-actions">
-        <div class="date-control">
-          <label for="schedule-date">Ngày xem lịch</label>
-          <input id="schedule-date" type="date" required>
-          <span class="field-error" id="date-error"></span>
+    </nav>
+
+    <div id="daily-view-panel" role="tabpanel" aria-labelledby="tab-view-daily">
+      <section class="panel date-panel" aria-labelledby="date-heading">
+        <div>
+          <h2 id="date-heading">Chọn ngày</h2>
+          <p>Mỗi ngày có một lịch riêng được lưu trên thiết bị này.</p>
         </div>
-        <button type="button" class="btn btn-secondary" id="copy-schedule-trigger" aria-haspopup="dialog" aria-controls="copy-schedule-dialog" disabled>Sao chép lịch sang ngày khác</button>
-      </div>
-    </section>
-
-    <div id="storage-notice" class="notice error" role="alert" hidden></div>
-
-    <div class="app-grid">
-      <section class="panel form-panel" aria-labelledby="form-heading">
-        <h2 id="form-heading">Thêm công việc</h2>
-        <p class="section-intro" id="form-intro">Điền thời gian và thông tin để tạo lịch.</p>
-        <p class="edit-context" id="edit-context" hidden></p>
-
-        <form id="task-form" novalidate>
-          <div class="field">
-            <label for="task-title">Tiêu đề công việc</label>
-            <input id="task-title" name="title" type="text" required maxlength="120" placeholder="Ví dụ: Họp nhóm dự án" aria-describedby="title-hint title-error">
-            <span class="hint" id="title-hint">Tối đa 120 ký tự.</span>
-            <span class="field-error" id="title-error"></span>
+        <div class="date-actions">
+          <div class="date-control">
+            <label for="schedule-date">Ngày xem lịch</label>
+            <input id="schedule-date" type="date" required>
+            <span class="field-error" id="date-error"></span>
           </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="start-time">Giờ bắt đầu</label>
-              <input id="start-time" name="start" type="time" required aria-describedby="start-error">
-              <span class="field-error" id="start-error"></span>
-            </div>
-            <div class="field">
-              <label for="end-time">Giờ kết thúc</label>
-              <input id="end-time" name="end" type="time" required aria-describedby="end-error">
-              <span class="field-error" id="end-error"></span>
-            </div>
-          </div>
-
-          <div id="overlap-notice" class="notice warning" role="status" aria-live="polite" hidden></div>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="task-category">Danh mục</label>
-              <select id="task-category" name="category" required aria-describedby="category-error">
-                <option value="company">Công ty</option>
-                <option value="personal">Cá nhân</option>
-              </select>
-              <span class="field-error" id="category-error"></span>
-            </div>
-            <div class="field">
-              <label for="task-priority">Mức ưu tiên</label>
-              <select id="task-priority" name="priority" required aria-describedby="priority-error">
-                <option value="low">Thấp</option>
-                <option value="medium" selected>Vừa</option>
-                <option value="high">Cao</option>
-              </select>
-              <span class="field-error" id="priority-error"></span>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-primary" id="submit-button" type="submit">Thêm vào lịch</button>
-            <button class="btn btn-secondary" id="cancel-edit" type="button" hidden>Hủy chỉnh sửa</button>
-          </div>
-        </form>
+          <button type="button" class="btn btn-secondary" id="copy-schedule-trigger" aria-haspopup="dialog" aria-controls="copy-schedule-dialog" disabled>Sao chép lịch sang ngày khác</button>
+        </div>
       </section>
 
-      <section class="panel timeline-panel" id="schedule" aria-labelledby="timeline-heading">
-        <div class="timeline-header">
-          <div>
-            <h2 id="timeline-heading" tabindex="-1">Lịch trình</h2>
-            <p id="selected-date-label"></p>
+      <div id="storage-notice" class="notice error" role="alert" hidden></div>
+
+      <div class="app-grid">
+        <section class="panel form-panel" aria-labelledby="form-heading">
+          <h2 id="form-heading">Thêm công việc</h2>
+          <p class="section-intro" id="form-intro">Điền thời gian và thông tin để tạo lịch.</p>
+          <p class="edit-context" id="edit-context" hidden></p>
+
+          <form id="task-form" novalidate>
+            <div class="field">
+              <label for="task-title">Tiêu đề công việc</label>
+              <input id="task-title" name="title" type="text" required maxlength="120" placeholder="Ví dụ: Họp nhóm dự án" aria-describedby="title-hint title-error">
+              <span class="hint" id="title-hint">Tối đa 120 ký tự.</span>
+              <span class="field-error" id="title-error"></span>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="start-time">Giờ bắt đầu</label>
+                <input id="start-time" name="start" type="time" required aria-describedby="start-error">
+                <span class="field-error" id="start-error"></span>
+              </div>
+              <div class="field">
+                <label for="end-time">Giờ kết thúc</label>
+                <input id="end-time" name="end" type="time" required aria-describedby="end-error">
+                <span class="field-error" id="end-error"></span>
+              </div>
+            </div>
+
+            <div id="overlap-notice" class="notice warning" role="status" aria-live="polite" hidden></div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="task-category">Danh mục</label>
+                <select id="task-category" name="category" required aria-describedby="category-error">
+                  <option value="company">Công ty</option>
+                  <option value="personal">Cá nhân</option>
+                </select>
+                <span class="field-error" id="category-error"></span>
+              </div>
+              <div class="field">
+                <label for="task-priority">Mức ưu tiên</label>
+                <select id="task-priority" name="priority" required aria-describedby="priority-error">
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Vừa</option>
+                  <option value="high">Cao</option>
+                </select>
+                <span class="field-error" id="priority-error"></span>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-primary" id="submit-button" type="submit">Thêm vào lịch</button>
+              <button class="btn btn-secondary" id="cancel-edit" type="button" hidden>Hủy chỉnh sửa</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel timeline-panel" id="schedule" aria-labelledby="timeline-heading">
+          <div class="timeline-header">
+            <div>
+              <h2 id="timeline-heading" tabindex="-1">Lịch trình</h2>
+              <p id="selected-date-label"></p>
+            </div>
+            <span class="count" id="task-count">0 công việc</span>
           </div>
-          <span class="count" id="task-count">0 công việc</span>
-        </div>
-        <div id="date-read-error" class="notice error" role="alert" hidden></div>
-        <ol class="task-list" id="task-list"></ol>
-        <div class="empty-state" id="empty-state" hidden>
-          <h3>Chưa có công việc nào</h3>
-          <p>Hãy thêm công việc đầu tiên cho ngày này.</p>
-          <button class="btn btn-primary" id="empty-add-button" type="button">Thêm công việc</button>
+          <div id="date-read-error" class="notice error" role="alert" hidden></div>
+          <ol class="task-list" id="task-list"></ol>
+          <div class="empty-state" id="empty-state" hidden>
+            <h3>Chưa có công việc nào</h3>
+            <p>Hãy thêm công việc đầu tiên cho ngày này.</p>
+            <button class="btn btn-primary" id="empty-add-button" type="button">Thêm công việc</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="weekly-view-panel" role="tabpanel" aria-labelledby="tab-view-weekly" hidden>
+      <section class="panel week-navigation-panel" aria-labelledby="week-heading">
+        <div class="week-nav-header">
+          <div class="week-heading-group">
+            <h2 id="week-heading" class="week-range-title">Tuần: 28/09/2026 – 04/10/2026</h2>
+            <p class="week-range-subtitle" id="week-range-desc">Từ Thứ Hai ngày 28/09 đến Chủ Nhật ngày 04/10/2026</p>
+          </div>
+          <div class="week-nav-actions" role="toolbar" aria-label="Điều hướng tuần">
+            <button type="button" class="btn btn-secondary week-nav-btn" id="week-prev-btn" aria-label="Chuyển sang tuần trước">
+              ← Tuần trước
+            </button>
+            <button type="button" class="btn btn-secondary week-nav-btn" id="week-today-btn" aria-label="Về tuần hiện tại">
+              Tuần này
+            </button>
+            <button type="button" class="btn btn-secondary week-nav-btn" id="week-next-btn" aria-label="Chuyển sang tuần sau">
+              Tuần sau →
+            </button>
+          </div>
         </div>
       </section>
+
+      <section class="panel weekly-summary-panel" aria-labelledby="weekly-summary-title">
+        <h3 id="weekly-summary-title" class="summary-title">Tổng quan tuần</h3>
+        <div class="weekly-metrics-grid">
+          <div class="metric-card metric-total">
+            <span class="metric-label">Tổng công việc</span>
+            <strong class="metric-value" id="metric-week-total">0 việc</strong>
+            <span class="metric-subtext">Trong 7 ngày</span>
+          </div>
+          <div class="metric-card metric-completed">
+            <span class="metric-label">Đã hoàn thành</span>
+            <strong class="metric-value" id="metric-week-completed">0 việc</strong>
+            <span class="metric-subtext" id="metric-week-percent">0% tiến độ</span>
+          </div>
+          <div class="metric-card metric-remaining">
+            <span class="metric-label">Chưa hoàn thành</span>
+            <strong class="metric-value" id="metric-week-remaining">0 việc</strong>
+            <span class="metric-subtext">Cần thực hiện</span>
+          </div>
+        </div>
+        <div id="weekly-corrupt-warning" class="notice warning" role="status" hidden></div>
+      </section>
+
+      <div class="panel week-empty-state" id="week-empty-state" role="status" hidden>
+        <h3 class="week-empty-title">Tuần này chưa có công việc nào</h3>
+        <p class="week-empty-desc" id="week-empty-desc">Tất cả các ngày từ Thứ Hai đến Chủ Nhật hiện đang trống lịch.</p>
+        <button type="button" class="btn btn-primary" id="week-start-monday-btn">Thêm công việc cho Thứ Hai</button>
+      </div>
+
+      <div class="weekly-grid" id="weekly-grid" role="region" aria-label="Lịch 7 ngày trong tuần"></div>
     </div>
 
     <dialog id="copy-schedule-dialog" class="panel copy-dialog" aria-labelledby="copy-dialog-title" aria-describedby="copy-dialog-desc">
@@ -662,7 +1211,26 @@
       copyOverlapWarning: document.getElementById("copy-overlap-warning"),
       copyDuplicateInfo: document.getElementById("copy-duplicate-info"),
       copyCancel: document.getElementById("copy-cancel-button"),
-      copySubmit: document.getElementById("copy-submit-button")
+      copySubmit: document.getElementById("copy-submit-button"),
+      tabDaily: document.getElementById("tab-view-daily"),
+      tabWeekly: document.getElementById("tab-view-weekly"),
+      tabList: document.getElementById("view-mode-tabs"),
+      dailyPanel: document.getElementById("daily-view-panel"),
+      weeklyPanel: document.getElementById("weekly-view-panel"),
+      weekHeading: document.getElementById("week-heading"),
+      weekRangeDesc: document.getElementById("week-range-desc"),
+      weekPrevBtn: document.getElementById("week-prev-btn"),
+      weekTodayBtn: document.getElementById("week-today-btn"),
+      weekNextBtn: document.getElementById("week-next-btn"),
+      metricWeekTotal: document.getElementById("metric-week-total"),
+      metricWeekCompleted: document.getElementById("metric-week-completed"),
+      metricWeekRemaining: document.getElementById("metric-week-remaining"),
+      metricWeekPercent: document.getElementById("metric-week-percent"),
+      weeklyCorruptWarning: document.getElementById("weekly-corrupt-warning"),
+      weekEmptyState: document.getElementById("week-empty-state"),
+      weekEmptyDesc: document.getElementById("week-empty-desc"),
+      weekStartMondayBtn: document.getElementById("week-start-monday-btn"),
+      weeklyGrid: document.getElementById("weekly-grid")
     };
 
     const errors = {
@@ -673,12 +1241,16 @@
       priority: document.getElementById("priority-error")
     };
 
+    const VI_DAY_NAMES = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+
     let tasks = [];
     let editingId = null;
     let editReturnButton = null;
     let cachedDestSnapshot = null;
     let lastCalculatedPlan = null;
     let storageAvailable = testStorage();
+    let currentViewMode = "daily";
+    let activeWeekMonday = null;
 
     function testStorage() {
       try {
@@ -724,6 +1296,53 @@
         weekday: "long", day: "2-digit", month: "2-digit", year: "numeric"
       }).format(date);
       return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    }
+
+    function toISODateString(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
+    function formatShortDate(value) {
+      if (!isValidDateValue(value)) return "";
+      const parts = value.split("-");
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
+    function formatDayMonth(value) {
+      if (!isValidDateValue(value)) return "";
+      const parts = value.split("-");
+      return parts[2] + "/" + parts[1];
+    }
+
+    function getWeekBoundaries(dateStr) {
+      if (!isValidDateValue(dateStr)) {
+        throw new Error("Ngày không hợp lệ: " + dateStr);
+      }
+      const parts = dateStr.split("-").map(Number);
+      const current = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+      const dayOfWeek = current.getDay();
+      const dayDiff = (dayOfWeek + 6) % 7;
+      const mondayDate = new Date(current.getFullYear(), current.getMonth(), current.getDate() - dayDiff, 12, 0, 0);
+
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const nextDate = new Date(mondayDate.getFullYear(), mondayDate.getMonth(), mondayDate.getDate() + i, 12, 0, 0);
+        days.push(toISODateString(nextDate));
+      }
+      return {
+        monday: days[0],
+        sunday: days[6],
+        days: days
+      };
+    }
+
+    function getAdjacentWeek(currentMonday, offsetWeeks) {
+      const parts = currentMonday.split("-").map(Number);
+      const date = new Date(parts[0], parts[1] - 1, parts[2] + (offsetWeeks * 7), 12, 0, 0);
+      return getWeekBoundaries(toISODateString(date));
     }
 
     function isValidTime(value) {
@@ -1124,6 +1743,7 @@
       elements.date.removeAttribute("aria-invalid");
       resetForm();
       tasks = loadTasks(elements.date.value);
+      activeWeekMonday = getWeekBoundaries(elements.date.value).monday;
       render();
       announce("Đã mở lịch ngày " + formatDate(elements.date.value) + ".");
     }
@@ -1570,6 +2190,624 @@
       elements.copyTrigger.focus();
     });
 
+    function taskSortComparator(a, b) {
+      return a.start.localeCompare(b.start) || a.end.localeCompare(b.end) || a.createdAt - b.createdAt;
+    }
+
+    function readDateTasks(dateStr) {
+      if (!isValidDateValue(dateStr)) {
+        return {
+          date: dateStr,
+          status: "corrupt_json",
+          tasks: [],
+          error: "Định dạng ngày không hợp lệ",
+          rawSnapshot: null
+        };
+      }
+      const key = STORAGE_PREFIX + dateStr;
+      let raw = null;
+      try {
+        raw = window.localStorage.getItem(key);
+      } catch (e) {
+        const memData = memoryStore.get(dateStr);
+        if (!memData) {
+          return { date: dateStr, status: "missing", tasks: [], rawSnapshot: null };
+        }
+        const allValid = memData.every(isValidStoredTask);
+        if (allValid) {
+          return {
+            date: dateStr,
+            status: "valid",
+            tasks: memData.slice().sort(taskSortComparator),
+            rawSnapshot: "mem:" + JSON.stringify(memData)
+          };
+        }
+        return {
+          date: dateStr,
+          status: "invalid_records",
+          tasks: [],
+          error: "Bản ghi bộ nhớ không hợp lệ",
+          invalidIndices: [],
+          rawSnapshot: "mem:invalid"
+        };
+      }
+
+      if (raw === null) {
+        return { date: dateStr, status: "missing", tasks: [], rawSnapshot: null };
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (err) {
+        return {
+          date: dateStr,
+          status: "corrupt_json",
+          tasks: [],
+          error: "Cú pháp JSON hỏng: " + err.message,
+          rawSnapshot: raw
+        };
+      }
+
+      if (!Array.isArray(parsed)) {
+        return {
+          date: dateStr,
+          status: "corrupt_json",
+          tasks: [],
+          error: "Dữ liệu lưu trữ không phải là mảng",
+          rawSnapshot: raw
+        };
+      }
+
+      const invalidIndices = [];
+      for (let i = 0; i < parsed.length; i++) {
+        if (!isValidStoredTask(parsed[i])) {
+          invalidIndices.push(i);
+        }
+      }
+
+      if (invalidIndices.length > 0) {
+        return {
+          date: dateStr,
+          status: "invalid_records",
+          tasks: [],
+          error: "Có " + invalidIndices.length + " bản ghi không hợp lệ",
+          invalidIndices: invalidIndices,
+          rawSnapshot: raw
+        };
+      }
+
+      const sorted = parsed.slice().sort(taskSortComparator);
+      return {
+        date: dateStr,
+        status: "valid",
+        tasks: sorted,
+        rawSnapshot: raw
+      };
+    }
+
+    function calculateWeeklyMetrics(daysData) {
+      let total = 0;
+      let completed = 0;
+      let corruptCount = 0;
+
+      for (let i = 0; i < daysData.length; i++) {
+        const day = daysData[i];
+        if (day.status === "corrupt_json" || day.status === "invalid_records") {
+          corruptCount++;
+          continue;
+        }
+        const dayTasks = day.tasks || [];
+        total += dayTasks.length;
+        for (let j = 0; j < dayTasks.length; j++) {
+          if (dayTasks[j].completed === true) {
+            completed++;
+          }
+        }
+      }
+
+      const remaining = total - completed;
+      const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      return {
+        totalWeeklyTasks: total,
+        completedWeeklyTasks: completed,
+        remainingWeeklyTasks: remaining,
+        completionRate: rate,
+        corruptDaysCount: corruptCount
+      };
+    }
+
+    function toggleTaskCompletionInWeek(taskDate, taskId) {
+      if (!isValidDateValue(taskDate)) {
+        return { ok: false, error: "invalid_date", message: "Ngày không hợp lệ." };
+      }
+
+      const dayResult = readDateTasks(taskDate);
+      if (dayResult.status === "corrupt_json" || dayResult.status === "invalid_records") {
+        return {
+          ok: false,
+          error: "corrupt_day",
+          message: "Dữ liệu của ngày này bị hỏng cấu trúc. Không thể thay đổi trạng thái."
+        };
+      }
+
+      const tasksList = dayResult.tasks;
+      const targetIndex = tasksList.findIndex(function (t) { return t.id === taskId; });
+
+      if (targetIndex === -1) {
+        return {
+          ok: false,
+          error: "task_not_found",
+          message: "Không tìm thấy công việc mục tiêu."
+        };
+      }
+
+      const targetTask = tasksList[targetIndex];
+      const previousState = targetTask.completed;
+      const newState = !previousState;
+
+      targetTask.completed = newState;
+
+      const targetKey = STORAGE_PREFIX + taskDate;
+      try {
+        window.localStorage.setItem(targetKey, JSON.stringify(tasksList));
+        memoryStore.set(taskDate, tasksList.slice());
+
+        if (elements.date.value === taskDate) {
+          tasks = tasksList.slice();
+        }
+
+        return {
+          ok: true,
+          task: targetTask,
+          previousState: previousState,
+          newState: newState,
+          date: taskDate,
+          taskId: taskId
+        };
+      } catch (err) {
+        return {
+          ok: false,
+          error: "storage_error",
+          message: "Lỗi ghi vào bộ nhớ: " + err.message
+        };
+      }
+    }
+
+    function createWeeklyStorageObserver() {
+      const originalSetItem = window.localStorage.setItem;
+      const calls = [];
+      window.localStorage.setItem = function (key, value) {
+        calls.push({
+          key: key,
+          byteLength: typeof value === "string" ? value.length : 0,
+          timestamp: Date.now()
+        });
+        return originalSetItem.apply(this, arguments);
+      };
+      return {
+        getCallCount: function () { return calls.length; },
+        getCallsForKey: function (targetKey) { return calls.filter(function (c) { return c.key === targetKey; }); },
+        reset: function () { calls.length = 0; },
+        restore: function () { window.localStorage.setItem = originalSetItem; }
+      };
+    }
+
+    function jumpToDay(dateStr) {
+      if (!isValidDateValue(dateStr)) return;
+      elements.date.value = dateStr;
+      setViewMode("daily");
+      tasks = loadTasks(dateStr);
+      render();
+      elements.timelineHeading.focus();
+      const bounds = getWeekBoundaries(dateStr);
+      const dayIndex = bounds.days.indexOf(dateStr);
+      const dayName = dayIndex >= 0 ? VI_DAY_NAMES[dayIndex] : "";
+      announce("Đã mở lịch trình chi tiết ngày " + (dayName ? dayName + ", " : "") + formatShortDate(dateStr) + ".");
+    }
+
+    function startMondayTask() {
+      if (!activeWeekMonday) return;
+      const bounds = getWeekBoundaries(activeWeekMonday);
+      elements.date.value = bounds.monday;
+      setViewMode("daily");
+      tasks = loadTasks(bounds.monday);
+      render();
+      elements.title.focus();
+      announce("Đã mở lịch trình ngày Thứ Hai, " + formatShortDate(bounds.monday) + ". Hãy thêm công việc đầu tiên.");
+    }
+
+    function renderCompactTask(task, dateStr, dayTasks) {
+      const card = document.createElement("article");
+      card.className = "compact-task-card " + task.category + (task.completed ? " completed" : "");
+      card.id = "week-task-card-" + task.id;
+      card.setAttribute("role", "listitem");
+
+      const header = document.createElement("div");
+      header.className = "compact-task-header";
+
+      const timeEl = document.createElement("time");
+      timeEl.className = "compact-task-time";
+      timeEl.textContent = task.start + "–" + task.end;
+      header.appendChild(timeEl);
+
+      const badges = document.createElement("div");
+      badges.className = "compact-badges";
+      badges.appendChild(createBadge(categoryLabels[task.category], "badge-sm badge-" + task.category));
+      badges.appendChild(createBadge("Ưu tiên: " + priorityLabels[task.priority], "badge-sm badge-priority"));
+
+      const hasConflict = dayTasks.some(function (other) {
+        return other.id !== task.id && overlaps(task, other);
+      });
+      if (hasConflict) {
+        badges.appendChild(createBadge("Trùng giờ", "badge-sm badge-overlap"));
+      }
+      header.appendChild(badges);
+      card.appendChild(header);
+
+      const titleEl = document.createElement("h4");
+      titleEl.className = "compact-task-title";
+      titleEl.textContent = task.title;
+      card.appendChild(titleEl);
+
+      const control = document.createElement("div");
+      control.className = "compact-completion-control";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = "week-chk-" + task.id;
+      checkbox.className = "compact-checkbox";
+      checkbox.dataset.taskId = task.id;
+      checkbox.dataset.taskDate = dateStr;
+      checkbox.checked = task.completed;
+
+      const label = document.createElement("label");
+      label.htmlFor = checkbox.id;
+      label.className = "compact-completion-label";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "compact-label-text";
+      labelSpan.textContent = task.completed
+        ? "Đã hoàn thành — bỏ đánh dấu “" + task.title + "”"
+        : "Chưa hoàn thành — đánh dấu “" + task.title + "”";
+      label.appendChild(labelSpan);
+
+      checkbox.addEventListener("change", function () {
+        const res = toggleTaskCompletionInWeek(dateStr, task.id);
+        if (!res.ok) {
+          announce("Lỗi: " + res.message);
+          checkbox.checked = !checkbox.checked;
+          return;
+        }
+        if (res.newState) {
+          card.classList.add("completed");
+          labelSpan.textContent = "Đã hoàn thành — bỏ đánh dấu “" + task.title + "”";
+          announce("Đã đánh dấu hoàn thành công việc: " + task.title + " (ngày " + formatShortDate(dateStr) + ").");
+        } else {
+          card.classList.remove("completed");
+          labelSpan.textContent = "Chưa hoàn thành — đánh dấu “" + task.title + "”";
+          announce("Đã bỏ đánh dấu hoàn thành: " + task.title + " (ngày " + formatShortDate(dateStr) + ").");
+        }
+        updateWeeklyMetricsDisplay();
+      });
+
+      control.appendChild(checkbox);
+      control.appendChild(label);
+      card.appendChild(control);
+
+      return card;
+    }
+
+    function renderWeekView() {
+      if (!activeWeekMonday || !isValidDateValue(activeWeekMonday)) {
+        activeWeekMonday = getWeekBoundaries(isValidDateValue(elements.date.value) ? elements.date.value : localDateValue()).monday;
+      }
+
+      const boundaries = getWeekBoundaries(activeWeekMonday);
+      elements.weekHeading.textContent = "Tuần: " + formatShortDate(boundaries.monday) + " – " + formatShortDate(boundaries.sunday);
+      elements.weekRangeDesc.textContent = "Từ Thứ Hai ngày " + formatDayMonth(boundaries.monday) + " đến Chủ Nhật ngày " + formatShortDate(boundaries.sunday);
+
+      const daysData = boundaries.days.map(function (d) { return readDateTasks(d); });
+      const metrics = calculateWeeklyMetrics(daysData);
+
+      elements.metricWeekTotal.textContent = metrics.totalWeeklyTasks + " việc";
+      elements.metricWeekCompleted.textContent = metrics.completedWeeklyTasks + " việc";
+      elements.metricWeekRemaining.textContent = metrics.remainingWeeklyTasks + " việc";
+      elements.metricWeekPercent.textContent = metrics.completionRate + "% tiến độ";
+
+      if (metrics.corruptDaysCount > 0) {
+        elements.weeklyCorruptWarning.textContent = "⚠ Có " + metrics.corruptDaysCount + " ngày bị lỗi dữ liệu (không tính vào tổng số).";
+        elements.weeklyCorruptWarning.hidden = false;
+      } else {
+        elements.weeklyCorruptWarning.textContent = "";
+        elements.weeklyCorruptWarning.hidden = true;
+      }
+
+      const isWeekEmpty = (metrics.totalWeeklyTasks === 0 && metrics.corruptDaysCount === 0);
+      elements.weekEmptyState.hidden = !isWeekEmpty;
+      if (isWeekEmpty) {
+        elements.weekEmptyDesc.textContent = "Tất cả các ngày từ Thứ Hai, " + formatDayMonth(boundaries.monday) + " đến Chủ Nhật, " + formatShortDate(boundaries.sunday) + " hiện đang trống lịch.";
+        elements.weekStartMondayBtn.textContent = "Thêm công việc cho Thứ Hai (" + formatDayMonth(boundaries.monday) + ")";
+      }
+
+      clearChildren(elements.weeklyGrid);
+
+      const todayStr = localDateValue();
+      const selectedDateStr = elements.date.value;
+
+      boundaries.days.forEach(function (dateStr, i) {
+        const dayName = VI_DAY_NAMES[i];
+        const dayResult = daysData[i];
+        const isToday = (dateStr === todayStr);
+        const isSelected = (dateStr === selectedDateStr);
+        const isCorrupt = (dayResult.status === "corrupt_json" || dayResult.status === "invalid_records");
+        const defaultOpen = isToday || isSelected || (i === 0 && !boundaries.days.includes(todayStr) && !boundaries.days.includes(selectedDateStr));
+
+        const col = document.createElement("div");
+        col.className = "day-column panel" + (isToday ? " is-today" : "") + (isSelected ? " is-selected" : "") + (defaultOpen ? " is-open" : "");
+        col.dataset.date = dateStr;
+        col.id = "day-col-" + dateStr;
+
+        const header = document.createElement("div");
+        header.className = "day-column-header";
+
+        const trigger = document.createElement("button");
+        trigger.type = "button";
+        trigger.className = "day-accordion-trigger";
+        trigger.id = "trigger-day-" + dateStr;
+        trigger.setAttribute("aria-expanded", String(defaultOpen));
+        trigger.setAttribute("aria-controls", "panel-day-" + dateStr);
+
+        const titleWrap = document.createElement("div");
+        titleWrap.className = "accordion-title-wrap";
+
+        const dayNameRow = document.createElement("div");
+        dayNameRow.className = "day-name-row";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "day-name";
+        nameSpan.textContent = dayName;
+        dayNameRow.appendChild(nameSpan);
+
+        if (isToday) {
+          dayNameRow.appendChild(createBadge("Hôm nay", "badge-today"));
+        }
+        titleWrap.appendChild(dayNameRow);
+
+        const dateEl = document.createElement("time");
+        dateEl.className = "day-date";
+        dateEl.textContent = formatShortDate(dateStr);
+        titleWrap.appendChild(dateEl);
+
+        const countBadge = document.createElement("span");
+        if (isCorrupt) {
+          countBadge.className = "badge badge-danger";
+          countBadge.textContent = "Lỗi";
+        } else {
+          countBadge.className = "badge day-count-badge";
+          countBadge.textContent = dayResult.tasks.length + " việc";
+        }
+        titleWrap.appendChild(countBadge);
+
+        trigger.appendChild(titleWrap);
+
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "accordion-icon";
+        iconSpan.setAttribute("aria-hidden", "true");
+        iconSpan.textContent = defaultOpen ? "▲" : "▼";
+        trigger.appendChild(iconSpan);
+
+        trigger.addEventListener("click", function () {
+          const currentlyExpanded = trigger.getAttribute("aria-expanded") === "true";
+          const next = !currentlyExpanded;
+          trigger.setAttribute("aria-expanded", String(next));
+          col.classList.toggle("is-open", next);
+          iconSpan.textContent = next ? "▲" : "▼";
+        });
+
+        header.appendChild(trigger);
+        col.appendChild(header);
+
+        const panel = document.createElement("div");
+        panel.className = "day-accordion-panel";
+        panel.id = "panel-day-" + dateStr;
+        panel.setAttribute("role", "region");
+        panel.setAttribute("aria-labelledby", trigger.id);
+
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "day-panel-actions";
+
+        const jumpBtn = document.createElement("button");
+        jumpBtn.type = "button";
+        jumpBtn.className = "btn btn-secondary btn-sm day-jump-btn";
+        jumpBtn.dataset.date = dateStr;
+        jumpBtn.setAttribute("aria-label", "Xem chi tiết ngày " + dayName + ", " + formatShortDate(dateStr));
+
+        const desktopText = document.createElement("span");
+        desktopText.className = "jump-desktop-text";
+        desktopText.textContent = "Xem ngày";
+        jumpBtn.appendChild(desktopText);
+
+        const mobileText = document.createElement("span");
+        mobileText.className = "jump-mobile-text";
+        mobileText.textContent = "Xem lịch ngày này →";
+        jumpBtn.appendChild(mobileText);
+
+        jumpBtn.addEventListener("click", function () {
+          jumpToDay(dateStr);
+        });
+        actionsDiv.appendChild(jumpBtn);
+        panel.appendChild(actionsDiv);
+
+        if (isCorrupt) {
+          const corruptCard = document.createElement("div");
+          corruptCard.className = "day-corrupt-card notice error";
+          corruptCard.setAttribute("role", "alert");
+
+          const corruptTitle = document.createElement("strong");
+          corruptTitle.className = "corrupt-title";
+          corruptTitle.textContent = "⚠ Dữ liệu ngày bị lỗi";
+          corruptCard.appendChild(corruptTitle);
+
+          const corruptDesc = document.createElement("p");
+          corruptDesc.className = "corrupt-desc";
+          corruptDesc.textContent = "Dữ liệu lưu trữ của ngày này bị hỏng cấu trúc hoặc bản ghi không hợp lệ.";
+          corruptCard.appendChild(corruptDesc);
+
+          const fixBtn = document.createElement("button");
+          fixBtn.type = "button";
+          fixBtn.className = "btn btn-secondary btn-sm day-jump-btn";
+          fixBtn.textContent = "Mở ngày để khắc phục";
+          fixBtn.addEventListener("click", function () {
+            jumpToDay(dateStr);
+          });
+          corruptCard.appendChild(fixBtn);
+          panel.appendChild(corruptCard);
+        } else if (dayResult.tasks.length === 0) {
+          const emptyBox = document.createElement("div");
+          emptyBox.className = "day-empty-box";
+
+          const emptyText = document.createElement("p");
+          emptyText.className = "day-empty-text";
+          emptyText.textContent = "Chưa có công việc";
+          emptyBox.appendChild(emptyText);
+          panel.appendChild(emptyBox);
+        } else {
+          const taskListDiv = document.createElement("div");
+          taskListDiv.className = "day-tasks-list";
+          taskListDiv.setAttribute("role", "list");
+
+          dayResult.tasks.forEach(function (task) {
+            taskListDiv.appendChild(renderCompactTask(task, dateStr, dayResult.tasks));
+          });
+          panel.appendChild(taskListDiv);
+        }
+
+        col.appendChild(panel);
+        elements.weeklyGrid.appendChild(col);
+      });
+    }
+
+    function updateWeeklyMetricsDisplay() {
+      if (!activeWeekMonday) return;
+      const boundaries = getWeekBoundaries(activeWeekMonday);
+      const daysData = boundaries.days.map(function (d) { return readDateTasks(d); });
+      const metrics = calculateWeeklyMetrics(daysData);
+
+      elements.metricWeekTotal.textContent = metrics.totalWeeklyTasks + " việc";
+      elements.metricWeekCompleted.textContent = metrics.completedWeeklyTasks + " việc";
+      elements.metricWeekRemaining.textContent = metrics.remainingWeeklyTasks + " việc";
+      elements.metricWeekPercent.textContent = metrics.completionRate + "% tiến độ";
+
+      boundaries.days.forEach(function (dateStr, i) {
+        const col = document.getElementById("day-col-" + dateStr);
+        if (!col) return;
+        const countBadge = col.querySelector(".day-count-badge");
+        if (countBadge && daysData[i].status === "valid") {
+          countBadge.textContent = daysData[i].tasks.length + " việc";
+        }
+      });
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      if (mode === "daily") {
+        elements.tabDaily.classList.add("active");
+        elements.tabDaily.setAttribute("aria-selected", "true");
+        elements.tabDaily.setAttribute("tabindex", "0");
+        elements.tabWeekly.classList.remove("active");
+        elements.tabWeekly.setAttribute("aria-selected", "false");
+        elements.tabWeekly.setAttribute("tabindex", "-1");
+        elements.dailyPanel.hidden = false;
+        elements.weeklyPanel.hidden = true;
+      } else {
+        elements.tabWeekly.classList.add("active");
+        elements.tabWeekly.setAttribute("aria-selected", "true");
+        elements.tabWeekly.setAttribute("tabindex", "0");
+        elements.tabDaily.classList.remove("active");
+        elements.tabDaily.setAttribute("aria-selected", "false");
+        elements.tabDaily.setAttribute("tabindex", "-1");
+        elements.dailyPanel.hidden = true;
+        elements.weeklyPanel.hidden = false;
+
+        if (isValidDateValue(elements.date.value)) {
+          activeWeekMonday = getWeekBoundaries(elements.date.value).monday;
+        } else {
+          activeWeekMonday = getWeekBoundaries(localDateValue()).monday;
+        }
+        renderWeekView();
+      }
+    }
+
+    elements.tabDaily.addEventListener("click", function () {
+      if (currentViewMode !== "daily") {
+        setViewMode("daily");
+        announce("Đã chuyển sang chế độ xem theo ngày.");
+      }
+    });
+
+    elements.tabWeekly.addEventListener("click", function () {
+      if (currentViewMode !== "weekly") {
+        setViewMode("weekly");
+        const bounds = getWeekBoundaries(activeWeekMonday);
+        announce("Đã chuyển sang chế độ xem theo tuần (từ " + formatShortDate(bounds.monday) + " đến " + formatShortDate(bounds.sunday) + ").");
+      }
+    });
+
+    elements.tabList.addEventListener("keydown", function (e) {
+      let targetTab = null;
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        targetTab = currentViewMode === "daily" ? elements.tabWeekly : elements.tabDaily;
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        targetTab = currentViewMode === "daily" ? elements.tabWeekly : elements.tabDaily;
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        targetTab = elements.tabDaily;
+      } else if (e.key === "End") {
+        e.preventDefault();
+        targetTab = elements.tabWeekly;
+      }
+
+      if (targetTab) {
+        targetTab.focus();
+        const newMode = targetTab === elements.tabDaily ? "daily" : "weekly";
+        if (newMode !== currentViewMode) {
+          setViewMode(newMode);
+          if (newMode === "daily") {
+            announce("Đã chuyển sang chế độ xem theo ngày.");
+          } else {
+            const bounds = getWeekBoundaries(activeWeekMonday);
+            announce("Đã chuyển sang chế độ xem theo tuần (từ " + formatShortDate(bounds.monday) + " đến " + formatShortDate(bounds.sunday) + ").");
+          }
+        }
+      }
+    });
+
+    elements.weekPrevBtn.addEventListener("click", function () {
+      activeWeekMonday = getAdjacentWeek(activeWeekMonday, -1).monday;
+      renderWeekView();
+      const bounds = getWeekBoundaries(activeWeekMonday);
+      announce("Đã chuyển sang tuần từ " + formatShortDate(bounds.monday) + " đến " + formatShortDate(bounds.sunday) + ".");
+    });
+
+    elements.weekTodayBtn.addEventListener("click", function () {
+      activeWeekMonday = getWeekBoundaries(localDateValue()).monday;
+      renderWeekView();
+      announce("Đã trở về tuần hiện tại.");
+    });
+
+    elements.weekNextBtn.addEventListener("click", function () {
+      activeWeekMonday = getAdjacentWeek(activeWeekMonday, 1).monday;
+      renderWeekView();
+      const bounds = getWeekBoundaries(activeWeekMonday);
+      announce("Đã chuyển sang tuần từ " + formatShortDate(bounds.monday) + " đến " + formatShortDate(bounds.sunday) + ".");
+    });
+
+    elements.weekStartMondayBtn.addEventListener("click", startMondayTask);
+
     window.__scheduleCopyEngine = {
       isValidStoredTask: isValidStoredTask,
       readDestinationTasks: readDestinationTasks,
@@ -1579,9 +2817,21 @@
       createStorageWriteObserver: createStorageWriteObserver
     };
 
+    window.__weeklyEngine = {
+      getWeekBoundaries: getWeekBoundaries,
+      getAdjacentWeek: getAdjacentWeek,
+      toISODateString: toISODateString,
+      isValidStoredTask: isValidStoredTask,
+      readDateTasks: readDateTasks,
+      calculateWeeklyMetrics: calculateWeeklyMetrics,
+      toggleTaskCompletionInWeek: toggleTaskCompletionInWeek,
+      createWeeklyStorageObserver: createWeeklyStorageObserver
+    };
+
     elements.date.value = localDateValue();
     showStorageWarning();
     tasks = loadTasks(elements.date.value);
+    activeWeekMonday = getWeekBoundaries(elements.date.value).monday;
     render();
   </script>
 </body>

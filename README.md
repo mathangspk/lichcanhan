@@ -207,6 +207,91 @@ Kiểm chứng thực tế thông qua wrapper `window.__scheduleCopyEngine.creat
 - Hộp thoại xác nhận xóa phụ thuộc giao diện native của `window.confirm`.
 - Khi dữ liệu của một ngày bị hỏng cấu trúc JSON, ứng dụng không thể tự khôi phục dữ liệu đó; lần lưu mới cho ngày đó sẽ thay thế giá trị hỏng sau khi đã hiển thị cảnh báo rõ ràng.
 
+## Tính năng: Quản lý công việc tuần (Cập nhật ngày 01 tháng 10 năm 2026)
+
+Tính năng **"Quản lý công việc tuần"** được bổ sung trong Vòng sửa đổi 3, tuân thủ nghiêm ngặt đặc tả tương tác (`DESIGN.md` Mục 15) và kiến trúc giải thuật (`WEEKLY_ARCHITECTURE.md` & `DESIGN.md` Mục 16).
+
+### 1. Hướng dẫn sử dụng & Luồng tương tác (Feature Instructions)
+1. **Bộ chuyển đổi chế độ xem (View Mode Switcher):**
+   - Nằm ngay đầu giao diện chính, gồm 2 tab: **“Xem theo ngày”** và **“Xem theo tuần”**.
+   - Hỗ trợ chuyển tab bằng chuột hoặc bàn phím (phím mũi tên `←`/`→`/`↑`/`↓`, `Home`, `End`).
+   - Kích thước tương tác tối thiểu 44 px, viền focus nhìn thấy rõ ràng (`:focus-visible`).
+2. **Thanh điều hướng tuần (Week Navigation):**
+   - Tiêu đề tuần tiếng Việt chuẩn ISO-8601 từ Thứ Hai đến Chủ Nhật: *“Tuần: DD/MM/YYYY – DD/MM/YYYY”* kèm mô tả *“Từ Thứ Hai ngày DD/MM đến Chủ Nhật ngày DD/MM/YYYY”*.
+   - Ba nút bấm điều hướng đạt chuẩn 44 px: **“← Tuần trước”**, **“Tuần này”** (trở về tuần chứa ngày hôm nay), và **“Tuần sau →”**.
+   - Đồng bộ hai chiều: khi chuyển từ xem ngày sang xem tuần, ứng dụng mở tuần chứa ngày đang xem; bấm “Tuần này” lập tức quay về tuần hiện tại.
+3. **Bảng tổng kết số liệu tuần (Weekly Summary Metrics Panel):**
+   - Hiển thị 3 số liệu định lượng: **Tổng công việc** (trong 7 ngày), **Đã hoàn thành** (kèm % tiến độ), và **Chưa hoàn thành**.
+   - Cập nhật thời gian thực khi bật/tắt hoàn thành trên bất kỳ công việc nào trong tuần.
+   - Nếu có ngày bị lỗi cấu trúc dữ liệu, bảng hiển thị cảnh báo phụ: *“⚠ Có K ngày bị lỗi dữ liệu (không tính vào tổng số).”*.
+4. **Bố cục 7 ngày (7-Day Overview Layout):**
+   - **Desktop (≥ 768 px):** Lưới 7 cột co giãn đều từ Thứ Hai đến Chủ Nhật. Mỗi cột có tiêu đề thứ, ngày tháng, huy hiệu số lượng việc, nút **“Xem ngày”**, điểm nhấn viền cho ngày hôm nay và ngày đang chọn.
+   - **Mobile (320 px – 767 px):** Accordion xếp tầng dọc 1 cột. Nút trigger mở/gập đạt chiều cao tối thiểu 48 px, hỗ trợ phím `Enter`/`Space`. Mặc định mở ngày hôm nay hoặc ngày đang chọn. Cam kết không tràn chiều ngang trang ở 320 px (`overflow-x: hidden`).
+5. **Thẻ công việc thu gọn & Đột biến hoàn thành:**
+   - Hiển thị giờ bắt đầu/kết thúc, huy hiệu danh mục (Công ty/Cá nhân), mức ưu tiên (Thấp/Vừa/Cao), và huy hiệu cảnh báo *“Trùng giờ”* nếu giao khoảng giờ với việc khác trong cùng ngày.
+   - Checkbox hoàn thành có vùng nhãn liên kết tương tác tối thiểu **44×44 CSS px** (nhãn inline-flex có `min-width: 44px; min-height: 44px;`).
+   - Nhấp vào checkbox đổi trạng thái tức thì, gạch ngang tiêu đề, phát thông báo live region `#app-status` và cập nhật bảng tổng kết tuần.
+6. **Điều hướng nhanh sang xem ngày (Quick Day Jump):**
+   - Nút **“Xem ngày”** (desktop) / **“Xem lịch ngày này →”** (mobile) trên mỗi ngày cho phép chuyển tức thì sang tab “Xem theo ngày” với ngày đó được chọn, sẵn sàng thêm hoặc chỉnh sửa công việc chi tiết.
+7. **Trạng thái rỗng & Cô lập lỗi ngày hỏng:**
+   - Ngày không có việc hiển thị hộp *“Chưa có công việc”*.
+   - Toàn tuần không có việc hiển thị banner *“Tuần này chưa có công việc nào”* kèm nút **“Thêm công việc cho Thứ Hai”**.
+   - Ngày bị hỏng dữ liệu hiển thị thẻ lỗi *“⚠ Dữ liệu ngày bị lỗi”* kèm nút *“Mở ngày để khắc phục”*, hoàn toàn không làm sập giao diện tuần hay ảnh hưởng tới 6 ngày hợp lệ còn lại (Zero Crash Guarantee).
+
+### 2. Quy tắc dữ liệu & Hợp đồng lưu trữ (Data Rules & Storage Contract)
+- **Nguồn chân lý duy nhất (Single Source of Truth):** Dữ liệu tuần được tổng hợp động trực tiếp tại thời điểm chạy từ 7 khóa ngày hiện hành: `lich-trinh-hang-ngay:v1:YYYY-MM-DD`. Tuyệt đối **không** tạo khóa tuần riêng (`week:YYYY-Wxx`) nhằm triệt tiêu nguy cơ bất đồng bộ bậc hai (secondary desync) và lãng phí dung lượng.
+- **Biên tuần tất định (Deterministic Week Boundaries):** Tính toán 7 ngày liên tiếp từ Thứ Hai đến Chủ Nhật bằng giải thuật phân tích số nguyên `[year, month, day]` và giờ trưa 12:00, loại bỏ hoàn toàn rủi ro nhảy ngày do múi giờ/DST; xử lý chính xác biên chuyển tháng, năm thường (28/02) và năm nhuận (29/02/2024).
+- **Bộ nạp ngày nghiêm ngặt (Strict Date Loader):** Hàm `readDateTasks(dateStr)` kiểm tra 10 điều kiện của `isValidStoredTask`, phân định rõ 4 trạng thái: `'missing'`, `'valid'`, `'corrupt_json'`, `'invalid_records'`.
+- **Hợp đồng đột biến hoàn thành:** Gọi `toggleTaskCompletionInWeek(taskDate, taskId)` thực hiện đúng **1 lượt ghi** vào khóa ngày của công việc đó (`STORAGE_PREFIX + taskDate`) và **0 lượt ghi** vào 6 ngày còn lại; bảo toàn 100% các trường còn lại (`id`, `title`, `start`, `end`, `category`, `priority`, `createdAt`) và thứ tự các công việc khác.
+- **Cam kết không ghi khi nạp tuần:** Quá trình tải, chuyển tab hoặc chuyển tuần chỉ đọc dữ liệu (`Δ(localStorage.setItem) = 0`).
+
+---
+
+## Bằng chứng triển khai & Kết quả kiểm thử — Quản lý công việc tuần (Frontend — ngày 01 tháng 10 năm 2026, Tác vụ 5d8e9a1ff5aa)
+
+### 1. Bằng chứng triển khai thành phần mã nguồn (Artifact Evidence)
+- **Bộ chuyển tab WAI-ARIA:** Bổ sung `.view-mode-nav` với `tab-view-daily` và `tab-view-weekly` theo chuẩn WAI-ARIA Tabs pattern, `role="tablist"`, `aria-selected`, `aria-controls`, phím mũi tên `←`/`→`/`↑`/`↓`, `Home`, `End`, và mục tiêu nhấn tối thiểu 44 px.
+- **Thanh điều hướng tuần:** Bổ sung `.week-navigation-panel` với `#week-heading` hiển thị dải tuần tiếng Việt, 3 nút bấm `#week-prev-btn`, `#week-today-btn`, `#week-next-btn` đạt chuẩn chiều cao 44 px.
+- **Bảng tổng kết tuần:** Bổ sung `.weekly-summary-panel` hiển thị 3 chỉ số `#metric-week-total`, `#metric-week-completed`, `#metric-week-remaining`, `#metric-week-percent` và cảnh báo `#weekly-corrupt-warning`.
+- **Bố cục 7 ngày thích ứng:** Lưới 7 cột `.weekly-grid` trên desktop (≥ 768 px) và accordion dọc `.day-accordion-trigger` trên mobile (320 px – 767 px) với chiều cao trigger 48 px, không tràn ngang.
+- **Thẻ công việc thu gọn:** `.compact-task-card` với huy hiệu loại, mức ưu tiên, trùng giờ, và checkbox hoàn thành `.compact-completion-label` có diện tích chạm tối thiểu 44×44 CSS px.
+- **Điều hướng nhanh:** Nút `.day-jump-btn` có nhãn linh hoạt ("Xem ngày" trên desktop, "Xem lịch ngày này →" trên mobile), kích hoạt chuyển sang xem ngày và focus vào `#timeline-heading`.
+- **Cơ chế cô lập lỗi:** Thẻ `.day-corrupt-card` bảo vệ giao diện khi một ngày bị hỏng cấu trúc; 6 ngày còn lại hiển thị bình thường.
+- **Audit DOM an toàn tuyệt đối:** 100% phần tử động tạo qua `createElement`, `textContent`, `setAttribute`, `classList`. Tuyệt đối không sử dụng `innerHTML`, `insertAdjacentHTML`, `outerHTML`, hay `document.write`.
+- **Điểm móc kiểm thử công khai (Test Hooks):** Xuất bản toàn bộ API thuần túy qua `window.__weeklyEngine`:
+  - `getWeekBoundaries(dateStr)`
+  - `getAdjacentWeek(currentMonday, offsetWeeks)`
+  - `toISODateString(d)`
+  - `isValidStoredTask(raw)`
+  - `readDateTasks(dateStr)`
+  - `calculateWeeklyMetrics(daysData)`
+  - `toggleTaskCompletionInWeek(taskDate, taskId)`
+  - `createWeeklyStorageObserver()`
+
+### 2. Đối chiếu 12 Bất biến toán học & Kịch bản thực tế
+- **ĐỐI CHIẾU MÃ — INV-01: Bất biến đủ 7 ngày liên tiếp:** Hàm `getWeekBoundaries(d)` luôn sinh chính xác mảng 7 ngày liên tiếp từ Thứ Hai đến Chủ Nhật cho mọi ngày ISO hợp lệ.
+- **ĐỐI CHIẾU MÃ — INV-02: Bất biến trật tự tuần ISO:** Ngày đầu tiên luôn là Thứ Hai (`getDay() === 1`), ngày cuối cùng luôn là Chủ Nhật (`getDay() === 0`).
+- **ĐỐI CHIẾU MÃ — INV-03: Bất biến ổn định chu trình tuần:** Truyền bất kỳ ngày nào trong 7 ngày của tuần vào `getWeekBoundaries` đều trả về cùng một tuần 7 ngày giống hệt nhau.
+- **ĐỐI CHIẾU MÃ — INV-04: Bất biến không tạo khóa tuần:** Toàn bộ quá trình tổng hợp dữ liệu chỉ đọc từ khóa `lich-trinh-hang-ngay:v1:YYYY-MM-DD`, không tạo khóa `week:`.
+- **ĐỐI CHIẾU MÃ — INV-05: Bất biến không ghi khi tải tuần:** Thao tác chuyển tab tuần, bấm tuần trước/sau hoặc nạp trang có $\Delta(\text{localStorage.setItem}) = 0$.
+- **ĐỐI CHIẾU MÃ — INV-06: Bất biến cô lập lỗi ngày hỏng:** Nếu 1 hoặc nhiều ngày có JSON hỏng hoặc bản ghi lỗi, chỉ các ngày đó hiển thị banner cảnh báo; các ngày hợp lệ còn lại hiển thị bình thường (Zero Crash).
+- **ĐỐI CHIẾU MÃ — INV-07: Bất biến ghi duy nhất khi toggle hoàn thành:** Gọi `toggleTaskCompletionInWeek(date, taskId)` thực hiện đúng 1 lượt gọi `setItem` vào khóa của `date`, và 0 lượt gọi vào bất kỳ ngày nào khác.
+- **ĐỐI CHIẾU MÃ — INV-08: Bất biến bảo toàn thuộc tính bản ghi:** Toàn bộ 7 trường (`id`, `title`, `start`, `end`, `category`, `priority`, `createdAt`) và thứ tự các công việc khác trong ngày được giữ nguyên vẹn 100%.
+- **ĐỐI CHIẾU MÃ — INV-09: Bất biến bảo toàn số lượng công việc tuần:** Luôn thỏa mãn `completedWeeklyTasks + remainingWeeklyTasks = totalWeeklyTasks`.
+- **ĐỐI CHIẾU MÃ — INV-10: Bất biến miền giá trị chỉ số:** `0 <= completedWeeklyTasks <= totalWeeklyTasks` và `0 <= completionRate <= 100`.
+- **ĐỐI CHIẾU MÃ — INV-11: Bất biến tuần rỗng:** Khi tổng số việc bằng 0, hoàn thành = 0, còn lại = 0, tỷ lệ = 0%; hiển thị banner rỗng tuần kèm nút thêm việc Thứ Hai.
+- **ĐỐI CHIẾU MÃ — INV-12: Bất biến xử lý năm nhuận:** Ngày `2024-02-29` tính ra Thứ Hai `2024-02-26` và Chủ Nhật `2024-03-03` chính xác.
+
+### 3. Kiểm tra smoke check cố định (`check_schedule.py`)
+- Cú pháp JavaScript hợp lệ (`node --check`).
+- Các thẻ ngữ nghĩa (`form`, `input`, `button`, `main`, `label`) đầy đủ.
+- Responsive (`viewport`, `@media`) đầy đủ.
+- Lưu trữ (`localStorage`) hợp lệ.
+- An toàn DOM tuyệt đối (không có `innerHTML` trong mã lệnh).
+```text
+PASS: schedule smoke checks and JavaScript syntax. Interaction/visual QA still required.
+```
+
 ## Giới hạn kiểm thử và sản phẩm
 
 - QA agent xác minh qua code-path/manual inspection và smoke check cố định; Codex đã kiểm chứng riêng persistence qua reload trên trình duyệt. Chưa có ma trận trình duyệt tự động. Hành vi screen reader và render ở 320 px vẫn cần kiểm tra trên thiết bị mục tiêu.
