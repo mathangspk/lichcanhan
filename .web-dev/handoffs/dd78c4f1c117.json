@@ -1,0 +1,9 @@
+{
+  "team": "0594884cb04f",
+  "task": "dd78c4f1c117",
+  "role": "planner",
+  "backend": "antigravity",
+  "model": "gemini-3.8-flash-high",
+  "dependencies": [],
+  "summary": "Kế hoạch kiểm nhận độc lập cho app Lịch cá nhân: phân công task QA trình duyệt và task Reviewer độc lập cho 6 tiêu chí C01-C06 theo đúng checklist đã duyệt."
+}
